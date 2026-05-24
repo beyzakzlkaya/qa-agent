@@ -19,7 +19,7 @@ type TypeFilter = "Tümü" | "Regresyon" | "Özel";
 
 interface Props {
   runs: Run[];
-  /** IDs from NextStepsPanel filter click */
+  /** IDs from AttentionPanel / module heatmap drill-down */
   activeFilterIds?: string[];
   /** Label shown in the active filter chip */
   activeFilterLabel?: string;

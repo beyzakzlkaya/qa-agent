@@ -3,12 +3,16 @@
 import { useState, useRef, useEffect } from "react";
 import type { Run } from "@/lib/mockData";
 import type { TestRun } from "@/lib/types";
-import { KpiCards } from "@/components/dashboard2/KpiCards";
-import { FailureDistribution, RecurringFailures } from "@/components/dashboard2/FailureCards";
-import { HourlyChart, DurationAnalysis } from "@/components/dashboard2/ChartSection";
+import { LiveStatusStrip } from "@/components/dashboard2/LiveStatusStrip";
+import { AttentionPanel } from "@/components/dashboard2/AttentionPanel";
+import { QualityHealthKpis } from "@/components/dashboard2/QualityHealthKpis";
+import { ModuleHeatmap } from "@/components/dashboard2/ModuleHeatmap";
+import { ErrorTypeDistribution } from "@/components/dashboard2/ErrorTypeDistribution";
+import { EnhancedPassRateTrend } from "@/components/dashboard2/EnhancedPassRateTrend";
+import { DurationTrendCard } from "@/components/dashboard2/DurationTrendCard";
+import { TestCoverageCard } from "@/components/dashboard2/TestCoverageCard";
+import { JiraActivitySummary } from "@/components/dashboard2/JiraActivitySummary";
 import { RunHistoryTable } from "@/components/dashboard2/RunHistoryTable";
-import { NextStepsPanel } from "@/components/dashboard2/NextSteps";
-import { TrendCharts } from "@/components/dashboard2/TrendCharts";
 import { GitBranch, RefreshCw, Loader2 } from "lucide-react";
 import Link from "next/link";
 
@@ -63,6 +67,7 @@ function dbRunToDashboardRun(r: TestRun, durationMs?: number): Run {
     total: r.totalCases,
     duration: formatDuration(durationMs),
     date: formatDate(r.startedAt),
+    startedAtIso: r.startedAt,
   };
 }
 
@@ -108,11 +113,6 @@ export default function DashboardPage() {
     setTimeout(() => setRefreshing(false), 800);
   };
 
-  const handleFilter = (ids: string[], label: string) => {
-    setActiveFilterIds(ids);
-    setActiveFilterLabel(label);
-  };
-
   const handleClearFilter = () => {
     setActiveFilterIds([]);
     setActiveFilterLabel("");
@@ -125,7 +125,7 @@ export default function DashboardPage() {
         <div>
           <h2 className="text-xl font-semibold text-foreground">Dashboard</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Test çalıştırma geçmişi, hata analizi ve öneriler
+            Anlık durum, kalite sağlığı ve aksiyon listesi
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -154,6 +154,13 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* ═══════════════════════════════════════════════════════════════════════
+          ÜST KISIM — "Şu an ne oluyor?"
+          ═══════════════════════════════════════════════════════════════════════ */}
+
+      {/* Section 1: Anlık Durum Şeridi — always rendered (live polls) */}
+      <LiveStatusStrip />
+
       {/* Loading state */}
       {loading && !error && (
         <div className="flex items-center justify-center py-12 text-muted-foreground gap-3">
@@ -162,11 +169,9 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Dashboard content — shown when we have data (even empty) */}
       {!loading && (
         <>
-          {/* Empty state */}
-          {runs.length === 0 && !error && (
+          {runs.length === 0 && !error ? (
             <div className="rounded-md border border-border bg-card p-8 text-center">
               <p className="text-sm text-muted-foreground">
                 Henüz test çalıştırması yok.{" "}
@@ -180,30 +185,41 @@ export default function DashboardPage() {
                 .
               </p>
             </div>
-          )}
-
-          {runs.length > 0 && (
+          ) : (
             <>
-              {/* Section 1: KPI Cards */}
-              <KpiCards runs={runs} />
+              {/* Section 2: Şimdi İlgilenmen Gerekenler */}
+              <AttentionPanel runs={runs} />
 
-              {/* Section 2: Two-column — Failure distribution + Recurring failures */}
+              {/* ═══════════════════════════════════════════════════════════════
+                  ORTA KISIM — "Trend nasıl?"
+                  ═══════════════════════════════════════════════════════════════ */}
+
+              {/* Section 3: Kalite Sağlığı KPI'ları (4 kart) */}
+              <QualityHealthKpis runs={runs} />
+
+              {/* Section 4: Modül heatmap + Hata türü dağılımı */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <FailureDistribution runs={runs} />
-                <RecurringFailures runs={runs} />
+                <ModuleHeatmap runs={runs} />
+                <ErrorTypeDistribution />
               </div>
 
-              {/* Section 3: Three-column — Hourly chart + Duration analysis */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div className="lg:col-span-2">
-                  <HourlyChart />
-                </div>
-                <div className="lg:col-span-1">
-                  <DurationAnalysis runs={runs} />
-                </div>
+              {/* Section 5: Trend grafiği + Süre trendi */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <EnhancedPassRateTrend />
+                <DurationTrendCard runs={runs} />
               </div>
 
-              {/* Section 4: Run History Table */}
+              {/* ═══════════════════════════════════════════════════════════════
+                  ALT KISIM — "Detaylar"
+                  ═══════════════════════════════════════════════════════════════ */}
+
+              {/* Section 6: Test kapsamı + JIRA aktivitesi */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <TestCoverageCard />
+                <JiraActivitySummary />
+              </div>
+
+              {/* Section 7: Run History Table */}
               <RunHistoryTable
                 runs={runs}
                 ref={tableRef}
@@ -211,14 +227,6 @@ export default function DashboardPage() {
                 activeFilterLabel={activeFilterLabel}
                 onClearFilter={handleClearFilter}
               />
-
-              {/* Section 5: Trend Charts (live DB data) */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <TrendCharts />
-              </div>
-
-              {/* Section 6: Next Steps */}
-              <NextStepsPanel runs={runs} tableRef={tableRef} onFilter={handleFilter} />
             </>
           )}
         </>
