@@ -16,7 +16,7 @@ import { generateTestCases } from "./test-generator";
 import { reportToJira } from "./reporter";
 import { transitionIssue } from "./api-clients";
 import { startRun } from "../test-engine/runner";
-import { getCaseResultsByRun, getRun } from "../db/queries";
+import { getCaseResultsByRun, getRun, recordJiraIteration } from "../db/queries";
 
 export interface PipelineResult {
   runId: string;
@@ -178,6 +178,13 @@ export async function runJiraPipeline(
   console.log(
     `[jira-pipeline] Run başlatıldı: ${runId} | ${cases.length} test | env: ${environment}`
   );
+
+  // İterasyon kaydı — detay sayfasında "Önceki QA İterasyonları" için
+  try {
+    recordJiraIteration(runId, taskKey);
+  } catch (err) {
+    console.warn(`[jira-runner] iteration kaydı atlandı: ${(err as Error).message}`);
+  }
 
   // Transition to IN QA immediately
   transitionIssue(taskKey, "IN QA").catch((err) =>

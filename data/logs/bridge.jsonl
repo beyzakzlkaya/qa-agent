@@ -590,3 +590,50 @@
 {"type":"connection","ts":"2026-05-24T14:15:26.410Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
 {"type":"connection","ts":"2026-05-24T14:24:24.383Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
 {"type":"connection","ts":"2026-05-24T15:01:33.944Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T15:34:15.335Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T16:15:04.902Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T16:15:16.400Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T16:15:16.444Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T16:48:42.965Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T17:16:13.764Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T19:29:26.948Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T20:22:21.497Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:21:17.165Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:21:20.215Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:21:20.246Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:21:28.822Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:21:28.860Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:22:17.221Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:22:17.249Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:27:11.241Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:27:14.111Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:27:14.137Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:27:15.967Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:27:15.999Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:27:16.443Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:27:16.468Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:27:16.662Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:27:16.687Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:27:16.815Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:27:16.841Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:27:16.948Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:27:16.977Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:30:58.482Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:30:58.519Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:31:02.445Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:31:02.471Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:38:11.391Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:38:11.426Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:38:43.270Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:38:43.298Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T22:47:37.549Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T22:47:37.597Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T23:05:00.982Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T23:05:03.286Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T23:05:03.318Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T23:05:21.367Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T23:05:21.435Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T23:12:49.745Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T23:14:02.161Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-05-24T23:21:24.552Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-05-24T23:21:24.631Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { startRun } from "@/lib/test-engine/runner";
 import { transitionIssue } from "@/lib/jira-pipeline/api-clients";
 import { schedulePostRunActions } from "@/lib/jira-pipeline/jira-runner";
+import { recordJiraIteration } from "@/lib/db/queries";
 import type { TestCase } from "@/lib/types";
 
 const ExecuteSchema = z.object({
@@ -49,6 +50,13 @@ export async function POST(req: NextRequest) {
       runType: data.runType ?? "regression",
       triggeredBy: "manual",
     });
+
+    // İterasyon kaydı — detay sayfasında "Önceki QA İterasyonları" için
+    try {
+      recordJiraIteration(runId, data.taskKey);
+    } catch (err) {
+      console.warn(`[execute] iteration kaydı atlandı: ${(err as Error).message}`);
+    }
 
     // Transition Jira task to "IN QA" — fire and forget
     transitionIssue(data.taskKey, "IN QA").catch((err) =>

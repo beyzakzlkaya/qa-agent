@@ -16,6 +16,7 @@ import type {
 import { getLlmConfig } from "../mcp-bridge/hub-wrapper";
 import { logLlmRequest, logInfo, logError } from "../logger";
 import { extractDiffRisks } from "./diff-risks";
+import { buildOpenAiChatBody } from "./llm-request";
 import { executeTestSuite } from "../test-engine/executeTestSuite";
 
 export { extractDiffRisks };
@@ -425,14 +426,12 @@ async function callLlmOnce(prompt: string): Promise<string> {
         system: GENERATOR_SYSTEM_PROMPT,
         messages: [{ role: "user", content: prompt }],
       }
-    : {
+    : buildOpenAiChatBody({
         model: llmConfig.model,
-        max_tokens: 8192,
-        messages: [
-          { role: "system", content: GENERATOR_SYSTEM_PROMPT },
-          { role: "user", content: prompt },
-        ],
-      };
+        system: GENERATOR_SYSTEM_PROMPT,
+        user: prompt,
+        maxTokens: 8192,
+      });
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

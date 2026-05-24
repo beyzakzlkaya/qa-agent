@@ -291,6 +291,89 @@ export function getScreenshots(testCaseId: string): ScreenshotRow[] {
     .all(testCaseId) as ScreenshotRow[];
 }
 
+// ─── JIRA risk summary cache ──────────────────────────────────────────────────
+
+export interface JiraRiskSummaryRow {
+  jira_key: string;
+  pr_number: number | null;
+  summary: string;
+  input_hash: string;
+  created_at: string;
+}
+
+export function getCachedRiskSummary(
+  jiraKey: string,
+  inputHash: string
+): JiraRiskSummaryRow | null {
+  const db = getDb();
+  const row = db
+    .prepare(
+      `SELECT * FROM jira_risk_summaries WHERE jira_key = ? AND input_hash = ?`
+    )
+    .get(jiraKey, inputHash) as JiraRiskSummaryRow | undefined;
+  return row ?? null;
+}
+
+export function saveRiskSummary(
+  jiraKey: string,
+  inputHash: string,
+  summary: string,
+  prNumber?: number | null
+): void {
+  const db = getDb();
+  db.prepare(
+    `INSERT OR REPLACE INTO jira_risk_summaries
+       (jira_key, pr_number, summary, input_hash, created_at)
+     VALUES (?, ?, ?, ?, datetime('now'))`
+  ).run(jiraKey, prNumber ?? null, summary, inputHash);
+}
+
+// ─── JIRA task iteration tracking ─────────────────────────────────────────────
+
+export interface JiraTaskIterationRow {
+  run_id: string;
+  jira_key: string;
+  iteration_index: number;
+  reopen_after: number;
+  reopen_reason: string | null;
+  created_at: string;
+}
+
+export function recordJiraIteration(
+  runId: string,
+  jiraKey: string
+): JiraTaskIterationRow {
+  const db = getDb();
+  const existing = db
+    .prepare(
+      `SELECT COUNT(*) as cnt FROM jira_task_iterations WHERE jira_key = ?`
+    )
+    .get(jiraKey) as { cnt: number };
+  const iterationIndex = (existing?.cnt ?? 0) + 1;
+  db.prepare(
+    `INSERT OR REPLACE INTO jira_task_iterations
+       (run_id, jira_key, iteration_index, reopen_after, reopen_reason)
+     VALUES (?, ?, ?, 0, NULL)`
+  ).run(runId, jiraKey, iterationIndex);
+  return {
+    run_id: runId,
+    jira_key: jiraKey,
+    iteration_index: iterationIndex,
+    reopen_after: 0,
+    reopen_reason: null,
+    created_at: new Date().toISOString(),
+  };
+}
+
+export function getJiraIterations(jiraKey: string): JiraTaskIterationRow[] {
+  const db = getDb();
+  return db
+    .prepare(
+      `SELECT * FROM jira_task_iterations WHERE jira_key = ? ORDER BY iteration_index ASC`
+    )
+    .all(jiraKey) as JiraTaskIterationRow[];
+}
+
 // ─── Trend Analytics ──────────────────────────────────────────────────────────
 
 export interface DailyTrendRow {

@@ -11,6 +11,8 @@ export interface Run {
   total: number;
   duration: string;
   date: string;
+  /** ISO timestamp of run start — used for time-bucketed aggregations. */
+  startedAtIso?: string;
 }
 
 export const runs: Run[] = [
@@ -63,20 +65,6 @@ export const runs: Run[] = [
   { id: "47", name: "KUPON5", status: "failed", env: "Preprod", type: "Özel", passed: 0, failed: 1, total: 1, duration: "33s", date: "03.04.26 16:00" },
   { id: "48", name: "[JIRA] NE-8610", status: "failed", env: "Preprod", type: "Regresyon", passed: 0, failed: 3, total: 3, duration: "24s", date: "03.04.26 15:30" },
   { id: "49", name: "Kupon3", status: "failed", env: "Preprod", type: "Özel", passed: 0, failed: 1, total: 1, duration: "1m 40s", date: "03.04.26 14:00" },
-];
-
-export const hourlyData = [
-  { time: "03:00", failures: 34 },
-  { time: "07:00", failures: 2 },
-  { time: "08:00", failures: 12 },
-  { time: "09:00", failures: 3 },
-  { time: "10:00", failures: 0 },
-  { time: "11:00", failures: 1 },
-  { time: "13:00", failures: 5 },
-  { time: "14:00", failures: 3 },
-  { time: "15:00", failures: 9 },
-  { time: "16:00", failures: 4 },
-  { time: "17:00", failures: 5 },
 ];
 
 export const mockErrorMap: Record<string, { errorType: string; stackTrace: string[] }> = {

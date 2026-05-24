@@ -88,5 +88,27 @@ function initSchema(db: Database.Database): void {
     );
 
     CREATE INDEX IF NOT EXISTS idx_screenshots_tc ON screenshots(test_case_id);
+
+    CREATE TABLE IF NOT EXISTS jira_risk_summaries (
+      jira_key TEXT NOT NULL,
+      pr_number INTEGER,
+      summary TEXT NOT NULL,
+      input_hash TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
+      PRIMARY KEY (jira_key, input_hash)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_jira_risk_summaries_key ON jira_risk_summaries(jira_key);
+
+    CREATE TABLE IF NOT EXISTS jira_task_iterations (
+      run_id TEXT PRIMARY KEY REFERENCES runs(id) ON DELETE CASCADE,
+      jira_key TEXT NOT NULL,
+      iteration_index INTEGER NOT NULL,
+      reopen_after BOOLEAN DEFAULT 0,
+      reopen_reason TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_jira_task_iterations_key ON jira_task_iterations(jira_key);
   `);
 }

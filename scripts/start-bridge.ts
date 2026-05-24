@@ -87,6 +87,10 @@ const _activeProvider = _llmProvider === "ollama" || _llmProvider === "ollama-lo
   ? _llmProvider
   : _llmProvider === "bedrock"
   ? "bedrock"
+  : _llmProvider === "anthropic"
+  ? "anthropic"
+  : _llmProvider === "openai"
+  ? "openai"
   : OPENAI_API_KEY ? "openai" : "anthropic";
 const _ollamaBase = OLLAMA_API_BASE;
 console.log(`[bridge] Aktif provider: ${_activeProvider}` + (
@@ -865,9 +869,13 @@ const server = http.createServer((req, res) => {
 
   // Anthropic proxy
   if (req.url?.startsWith("/anthropic-proxy/")) {
-    handleProxy(req, res, ANTHROPIC_API_BASE, ANTHROPIC_API_KEY, "/anthropic-proxy", {
+    // Anthropic Bearer Authorization değil x-api-key header'ı bekler;
+    // anahtarı extraHeaders üzerinden enjekte etmezsek upstream 401 döner.
+    const anthropicHeaders: Record<string, string> = {
       "anthropic-version": "2023-06-01",
-    }, (parsed) => {
+    };
+    if (ANTHROPIC_API_KEY) anthropicHeaders["x-api-key"] = ANTHROPIC_API_KEY;
+    handleProxy(req, res, ANTHROPIC_API_BASE, ANTHROPIC_API_KEY, "/anthropic-proxy", anthropicHeaders, (parsed) => {
       if (parsed.tool_choice && typeof parsed.tool_choice === "object") {
         const tc = parsed.tool_choice as Record<string, unknown>;
         if (tc.type === "any") {
