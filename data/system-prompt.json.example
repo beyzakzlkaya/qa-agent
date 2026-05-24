@@ -1,0 +1,37 @@
+{
+  "credentials": {
+    "backoffice": {
+      "username": "admin@getmobil.com",
+      "password": "Admin123!"
+    },
+    "partner": {
+      "username": "partner@getmobil.com",
+      "password": "Partner123!"
+    },
+    "website": {
+      "email": "test@getmobil.com",
+      "password": "Test123!"
+    }
+  },
+  "testCards": {
+    "visa": {
+      "number": "4032800000000007",
+      "expiry": "12/36",
+      "cvv": "078"
+    },
+    "mastercard": {
+      "number": "5500 0000 0000 0004",
+      "expiry": "12/26",
+      "cvv": "456"
+    }
+  },
+  "otp": {
+    "defaultCode": "65099",
+    "testPhoneNumber": "+90 555 000 0000"
+  },
+  "commonData": {
+    "testEmail": "test@getmobil.com",
+    "testPhone": "+90 555 000 0001",
+    "testName": "Test Kullanıcı"
+  }
+}

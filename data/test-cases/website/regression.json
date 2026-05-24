@@ -1,0 +1,24 @@
+[
+  {
+    "id": "TC-IDENTITY-009-reg",
+    "title": "Customer OTP Login — Regression (Sepet Akışı)",
+    "platform": ["website"],
+    "tags": ["regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to https://preprod.getmobil.com. Click the cart icon. Verify Sepetim page. Click 'Alışverişe Başla' to go to PLP. Find 'Apple iPhone 15 Pro Max 512 GB Mavi Titanyum' and click it. On the PDP, click the 'Hızlı Al' button. Verify pop-up 'Getmobil'e Hoşgeldiniz!' opens. Click 'Giriş Yap / Üye Ol'. Verify +90 phone prefix. Enter 5392295806. Click 'Devam et'. Verify OTP screen. Enter a WRONG OTP and verify an error is shown with retry allowed (user remains on OTP screen). Enter correct OTP 65099. Click 'Doğrula'. Verify toast 'Başarılı Bir Şekilde Giriş Yaptınız'. Click Getmobil logo and verify homepage loads authenticated. Verify no error state during entire flow. Edge case: attempt the Hızlı Al button while already authenticated — verify modal does NOT appear and product is added to cart directly.",
+    "expectedOutcome": "Full regression: OTP login via Hızlı Al succeeds. Wrong OTP shows error with retry. Correct OTP logs user in. Authenticated user clicking Hızlı Al skips modal. No error state throughout.",
+    "tcContext": "TC-IDENTITY-009 regression. Uses cart → PLP → PDP → Hızlı Al path (profil SVG icon inaccessible). Includes wrong OTP edge case and already-authenticated behavior. Phone: 5392295806, OTP: 65099. Side effect: product added to cart."
+  },
+  {
+    "id": "TC-IDENTITY-010-reg",
+    "title": "Customer OTP Register — Regression",
+    "platform": ["website"],
+    "tags": ["regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to ${GETMOBIL_WEB_URL}. Open login modal. Enter a NEW unregistered phone number. Click 'Devam et'. Verify register form appears. Test validation: click 'Devam et' without filling name/surname/email and verify form does not submit (inline errors shown per empty field). Enter an invalid email format (e.g. 'notanemail') and verify email validation error. Fill all fields correctly (name, surname, valid email). Click 'Devam et'. Verify OTP screen. Enter wrong OTP and verify retry allowed. Enter correct OTP 65099 and submit. Verify success, modal closes, token stored. Test: enter an ALREADY REGISTERED phone — verify register form does NOT appear and user is directed to OTP login instead. Cleanup: delete created user from users table.",
+    "expectedOutcome": "New user registration succeeds with full validation. Already-registered phone redirects to OTP login. Token stored after success. Cleanup done.",
+    "tcContext": "TC-IDENTITY-010 regression. Includes form validation, already-registered phone edge case, wrong OTP retry."
+  }
+]

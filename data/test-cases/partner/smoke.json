@@ -1,0 +1,140 @@
+[
+  {
+    "id": "TC-PP-001",
+    "title": "Partner Login",
+    "platform": ["partner"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to the partner panel login page. Enter the partner credentials (username and password from system prompt). Click login. Verify the partner dashboard is visible.",
+    "expectedOutcome": "Partner dashboard is loaded with partner-specific navigation and content"
+  },
+  {
+    "id": "TC-PP-002",
+    "title": "Partner Dashboard Görüntüleme",
+    "platform": ["partner"],
+    "tags": ["smoke"],
+    "priority": "high",
+    "domain": "general",
+    "prompt": "Login to the partner panel with partner credentials. Verify that the dashboard shows partner-specific information such as sales stats, orders, or earnings.",
+    "expectedOutcome": "Partner dashboard displays relevant statistics and data"
+  },
+  {
+    "id": "TC-PP-003",
+    "title": "Partner Sipariş Listesi",
+    "platform": ["partner"],
+    "tags": ["smoke"],
+    "priority": "high",
+    "domain": "order",
+    "prompt": "Login to partner panel. Navigate to the orders or transactions section. Verify the orders list is visible.",
+    "expectedOutcome": "Partner orders list is visible with order records"
+  },
+  {
+    "id": "TC-PP-004",
+    "title": "Partner Ürün Yönetimi",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "inventory",
+    "prompt": "Login to partner panel. Navigate to the products or catalog management section. Verify that the partner can view their product listings.",
+    "expectedOutcome": "Partner product management page is visible"
+  },
+  {
+    "id": "TC-PP-005",
+    "title": "Partner Profil Sayfası",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "general",
+    "prompt": "Login to partner panel. Navigate to the profile or account settings section. Verify the partner's profile information is displayed correctly.",
+    "expectedOutcome": "Partner profile page shows account information"
+  },
+  {
+    "id": "TC-IDENTITY-001",
+    "title": "Vendor Login — Happy Path",
+    "platform": ["partner"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to ${PARTNER_PORTAL_URL}/giris-yap. Verify [data-testid='login-page'] is visible. Verify the Email input field is present and focusable. Enter ${TEST_VENDOR_EMAIL} in the Email field. Enter ${TEST_VENDOR_PASSWORD} in the Şifre field — verify it is masked. Click the 'Giriş Yap' button. Verify the button enters a loading state. Wait for the system to send POST /identity/auth/token. Verify redirect to /dashboard/overview. Verify the dashboard overview page fully renders — at least one widget or card is visible. Verify the vendor display name (matching FIXTURE-USER-VENDOR-001.vendor_name) appears in the header or sidebar. Verify auth token is stored in localStorage, sessionStorage, or as an httpOnly cookie.",
+    "expectedOutcome": "Vendor is redirected to ${PARTNER_PORTAL_URL}/dashboard/overview. [data-testid='login-page'] is no longer visible. Dashboard loads with at least one widget/card. Vendor name 'Test Vendor Standard' is visible in header. Auth token is stored. No error toast is shown.",
+    "tcContext": "TC-IDENTITY-001: Vendor login — happy path. Priority: critical. Domain: identity/authentication. Surface: partner-portal. Fixture: FIXTURE-USER-VENDOR-001. API: POST /identity/auth/token. Blocks all other vendor-facing scenarios."
+  },
+  {
+    "id": "TC-IDENTITY-002",
+    "title": "Vendor Login — Invalid Credentials",
+    "platform": ["partner"],
+    "tags": ["smoke", "regression"],
+    "priority": "high",
+    "domain": "identity",
+    "prompt": "Navigate to ${PARTNER_PORTAL_URL}/giris-yap. Enter ${TEST_VENDOR_EMAIL} in the Email field. Enter 'WrongPassword123!' in the Şifre field. Click the 'Giriş Yap' button. Verify the button shows a brief loading state. Verify the system sends POST /identity/auth/token and receives 401 Unauthorized. Verify an error message is displayed — e.g. 'E-posta veya şifre hatalı' or equivalent. Verify the URL has NOT changed and remains on /giris-yap. Verify no auth token is stored in localStorage, sessionStorage, or cookies. Verify the Email and Password form fields remain present and editable.",
+    "expectedOutcome": "Login is rejected. Error message ('E-posta veya şifre hatalı' or equivalent) is visible. URL remains on ${PARTNER_PORTAL_URL}/giris-yap. No auth token created. Login form fields are still interactive.",
+    "tcContext": "TC-IDENTITY-002: Vendor login — invalid credentials. Priority: high. Domain: identity/authentication/negative. Surface: partner-portal. Fixture: FIXTURE-USER-VENDOR-001. API: POST /identity/auth/token (expects 401). Edge cases: non-existent email should return same generic error (no email enumeration), empty fields trigger client-side validation, SQL injection in email is sanitized, 5 consecutive failures may trigger rate limiting."
+  },
+  {
+    "id": "TC-ORDER-001",
+    "title": "Happy Path Checkout — Credit Card Payment",
+    "platform": ["partner"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "order",
+    "prompt": "Authenticate as customer via POST /auth/token. Add a device variant to cart via POST /cart/items with quantity 1. Verify GET /cart returns 1 item with correct price. Create order via POST /orders with cart ID and Visa card payment payload (card: 4111111111111111, expiry: 1228, cvv: 123, name: Test Kullanıcı). Verify POST /orders returns 201 with orderId. Verify GET /orders/{orderId} shows status CONFIRMED and payment.status COMPLETED. Verify inventory for the variant decreased by 1. Verify GET /cart returns empty or 404. Verify invoiceRef is non-null.",
+    "expectedOutcome": "Order is created with CONFIRMED status. Payment is COMPLETED. Cart is cleared. Inventory decremented by 1. Invoice reference present.",
+    "tcContext": "TC-ORDER-001: Happy path checkout with credit card (Craftgate/Visa). Priority: critical. Domain: order/checkout. Surface: partner-portal + public-api. Cleanup: cancel order via DELETE /oms/orders/{orderId} after test."
+  },
+  {
+    "id": "TC-ORDER-006",
+    "title": "Vendor Views Order List with Filters",
+    "platform": ["partner"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "order",
+    "prompt": "Login to partner portal as vendor. Navigate to /dashboard/order-management/my-orders. Verify the order table headers are visible: Sipariş No, Tarih, Ürün, Durum, Tutar. Verify the order list is populated. Click the Durum filter dropdown and select 'Tamamlandı' (COMPLETED). Verify only COMPLETED orders are shown. Verify SHIPPED orders are not visible. Clear the filter and verify all orders reload. Click on the first order row and verify navigation to the order detail page (URL contains /order?id=).",
+    "expectedOutcome": "Order list loads with all orders. COMPLETED filter shows only completed orders. Clearing filter shows all orders. Clicking a row navigates to order detail.",
+    "tcContext": "TC-ORDER-006: Vendor views order list with filters. Priority: critical. Domain: order/order-management. Surface: partner-portal. API: GET /oms/orders."
+  },
+  {
+    "id": "TC-INV-001",
+    "title": "Vendor Views Device Inventory List",
+    "platform": ["partner"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to /dashboard/inventory/my-devices. Verify the inventory page renders with column headers: Ürün, Kapasite, Renk, Durum, Stok, Fiyat. Verify at least one device appears in the list. Verify the device's Stok column shows a correct number. Verify the Fiyat column shows a price in ₺ format. Type 'iPhone' in the search/filter input and verify only iPhone devices are shown. Clear the search and verify all devices reload.",
+    "expectedOutcome": "Inventory page renders with device list. Correct columns and data visible. Search filter works to show only matching devices.",
+    "tcContext": "TC-INV-001: Vendor views device inventory list. Priority: critical. Domain: inventory/my-devices. Surface: partner-portal. API: GET /inventory/variants."
+  },
+  {
+    "id": "TC-INV-002",
+    "title": "Vendor Updates Device Price",
+    "platform": ["partner"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to /dashboard/inventory/my-devices. Locate the target device row (iPhone 14 Pro, 256GB, Space Black). Click the 'Fiyat Güncelle' button or inline price edit icon. Clear the existing price and enter 14999. Click the 'Kaydet' (Save) button. Verify the API call succeeds (PATCH /inventory/variant-inventories/{id} returns 200). Verify the device row now shows ₺14.999 without a full page reload. Verify no error banner or toast error is shown.",
+    "expectedOutcome": "Price is updated to ₺14.999 and immediately reflected in the UI. API returns 200. No error messages.",
+    "tcContext": "TC-INV-002: Vendor updates device price. Priority: critical. Domain: inventory/my-devices. Surface: partner-portal. API: PATCH /inventory/variant-inventories/{id}."
+  },
+  {
+    "id": "TC-TI-001",
+    "title": "PDP Async Trade-In Badge and Drawer",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Navigate to a product detail page (PDP) on the website as an authenticated customer. Verify that the trade-in badge or banner is visible asynchronously on the PDP. Click on the trade-in badge or 'Cihazını Sat' link. Verify the trade-in drawer or modal opens. Verify the drawer shows device selection or valuation entry fields.",
+    "expectedOutcome": "Trade-in badge appears on PDP. Clicking it opens the trade-in drawer with correct UI elements.",
+    "tcContext": "TC-TI-001: PDP async trade-in badge and drawer. Priority: high. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-TI-002",
+    "title": "Buyback Question Flow — Price Calculation",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Start the trade-in/buyback flow on the website. Select a device model and answer all device condition questions (screen condition, battery, accessories, etc.). After completing the questionnaire, verify a calculated buyback price is displayed. Verify the price reflects the answers given (e.g. worse condition = lower price).",
+    "expectedOutcome": "Buyback question flow completes successfully. A price offer is calculated and displayed based on device condition answers.",
+    "tcContext": "TC-TI-002: Buyback question flow and price calculation. Priority: high. Domain: trade-in/web."
+  }
+]

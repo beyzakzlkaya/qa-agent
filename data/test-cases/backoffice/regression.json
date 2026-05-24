@@ -1,0 +1,64 @@
+[
+  {
+    "id": "TC-BO-R001",
+    "title": "Yeni Ürün Oluşturma",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "inventory",
+    "prompt": "Login to backoffice with admin credentials. Navigate to Products section. Click 'Add New Product' or similar button. Fill in the product name with 'Test Ürün {{commonData.testName}}', add a description, set a price of 99.99. Save the product. Verify it appears in the product list.",
+    "expectedOutcome": "New product is created and appears in the product list"
+  },
+  {
+    "id": "TC-BO-R002",
+    "title": "Kullanıcı Filtreleme",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "general",
+    "prompt": "Login to backoffice with admin credentials. Navigate to Users section. Look for filter or search options. Filter users by status 'Active' if available. Verify the list updates based on the filter.",
+    "expectedOutcome": "User list is filtered and shows relevant results"
+  },
+  {
+    "id": "TC-BO-R003",
+    "title": "Sipariş Detay Görüntüleme",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "order",
+    "prompt": "Login to backoffice with admin credentials. Navigate to Orders section. Click on the first order in the list. Verify that the order detail page shows order information, customer details, and order items.",
+    "expectedOutcome": "Order detail page is visible with complete order information"
+  },
+  {
+    "id": "TC-BO-R004",
+    "title": "Pagination Kontrolü",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "low",
+    "domain": "general",
+    "prompt": "Login to backoffice with admin credentials. Navigate to Orders section. If pagination controls are visible, click on page 2 or 'Next' button. Verify the list updates to show the next page of results.",
+    "expectedOutcome": "Pagination works and navigates to the next page of results"
+  },
+  {
+    "id": "TC-BO-009-reg",
+    "title": "Admin Signs In to Backoffice — Happy Path (Regression)",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Verify page loads with HTTP 200. Verify the left-side decorative image is present (non-zero dimensions, src not broken). Verify 'Giriş' heading is visible within 3s. Verify 'Giriş için email ve şifrenizi giriniz' subtitle is visible. Enter ${TEST_ADMIN_EMAIL} in the Email field. Enter ${TEST_ADMIN_PASSWORD} in the Password field — verify type is 'password' and characters are masked. Click show/hide toggle: verify input switches to type='text'. Click toggle again: verify input returns to type='password'. Click 'Giriş'. Verify redirect to dashboard (sign-in URL is NOT the final URL). Verify no error banner is shown. Verify [data-testid='login-page'] is no longer visible.",
+    "expectedOutcome": "Admin is redirected to dashboard. Page elements (Giriş heading, subtitle, decorative image) are all correctly rendered. Password toggle works in both directions. No error banner post-login. Sign-in page is no longer shown.",
+    "tcContext": "TC-BO-009: Admin signs in to Backoffice with valid credentials. Full regression check including UI element verification, left-side image render, password toggle both directions, and post-login assertions. Fixture: FIXTURE-USER-ADMIN-001. Precondition: SHARED-PRE-002. API: POST /identity/auth/token."
+  },
+  {
+    "id": "TC-BO-010-reg",
+    "title": "Dealer-Owner Role Blocked from Backoffice (Regression)",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Enter ${TEST_VENDOR_EMAIL} in the Email field. Enter ${TEST_VENDOR_PASSWORD} in the Password field. Click 'Giriş'. Verify login is rejected: URL remains on ${BACKOFFICE_URL}/authentication/sign-in/ (ER-1). Verify a visible error banner or inline message is displayed — e.g. 'Bu hesap backoffice'e erişim iznine sahip değil' or equivalent (ER-2). Verify the backoffice dashboard URL is never reached and no authenticated session is created (ER-3). Verify the page does NOT remain blank or in an infinite spinner (ER-4). Also verify via direct API: POST /identity/auth/token with dealer credentials must deny backoffice scope.",
+    "expectedOutcome": "Dealer-owner is blocked. Error message is visible (ER-2). URL stays on sign-in (ER-1). No dashboard access or session created (ER-3). Page is responsive — no blank or infinite spinner (ER-4). API denies backoffice scope.",
+    "tcContext": "TC-BO-010: Dealer-owner role is blocked from accessing Backoffice. Full regression check with all 4 assertion conditions. Fixture: FIXTURE-USER-VENDOR-001. API: POST /identity/auth/token. Also validates EC-2 (direct API token request with dealer credentials)."
+  }
+]

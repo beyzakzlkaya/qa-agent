@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 97.6%;
+    --foreground: 220 13% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 13% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 13% 13%;
+    --primary: 213 72% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 13% 13%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 220 13% 13%;
+    --destructive: 1 72% 59%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 213 72% 54%;
+    --radius: 0.5rem;
+    --success: 158 69% 37%;
+    --success-foreground: 0 0% 100%;
+    --warning: 37 85% 55%;
+    --warning-foreground: 0 0% 100%;
+  }
+
+  .dark {
+    /* Slate palette */
+    --bg-deep:    #111318;
+    --bg-card:    #181c24;
+    --bg-raised:  #1e2330;
+    --bg-sidebar: #0e1118;
+    --bg-active:  #131929;
+
+    --border-main: #252c3a;
+    --border-sub:  #1c2230;
+    --border-dim:  #1a1f2a;
+
+    --txt-primary:   #d4dbe8;
+    --txt-secondary: #6b7a94;
+    --txt-dim:       #3d4a60;
+
+    --accent-color:  #7c9abf;
+    --accent-dim:    #354560;
+    --accent-bg:     #131929;
+
+    --danger:        #c05b5b;
+    --danger-bg:     #2a1a1a;
+    --warn:          #b87c3a;
+    --warn-bg:       #2a1e10;
+    --success-color: #4e8a6a;
+    --success-bg:    #1a2a20;
+
+    /* Map Tailwind semantic tokens to slate palette */
+    --background: 221 15% 8%;        /* #111318 */
+    --foreground: 220 25% 87%;       /* #d4dbe8 */
+    --card: 224 15% 11%;             /* #181c24 */
+    --card-foreground: 220 25% 87%;
+    --popover: 224 15% 11%;
+    --popover-foreground: 220 25% 87%;
+    --primary: 212 34% 61%;          /* #7c9abf */
+    --primary-foreground: 221 15% 8%;
+    --secondary: 222 24% 15%;        /* #1e2330 */
+    --secondary-foreground: 220 25% 87%;
+    --muted: 222 24% 15%;
+    --muted-foreground: 220 16% 48%; /* #6b7a94 */
+    --accent: 222 24% 15%;
+    --accent-foreground: 220 25% 87%;
+    --destructive: 0 40% 55%;        /* #c05b5b */
+    --destructive-foreground: 220 25% 87%;
+    --border: 221 20% 20%;           /* #252c3a */
+    --input: 221 20% 20%;
+    --ring: 212 34% 61%;
+    --success: 150 28% 42%;          /* #4e8a6a */
+    --success-foreground: 220 25% 87%;
+    --warning: 32 54% 47%;           /* #b87c3a */
+    --warning-foreground: 220 25% 87%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.animate-pulse-dot {
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}

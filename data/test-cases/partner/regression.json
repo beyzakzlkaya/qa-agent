@@ -1,0 +1,209 @@
+[
+  {
+    "id": "TC-PP-R001",
+    "title": "Partner Rapor İndirme",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "general",
+    "prompt": "Login to partner panel. Navigate to reports or analytics section. Look for a download or export option. If available, initiate a report download. Verify the download starts or a report is generated.",
+    "expectedOutcome": "Report export functionality works and initiates a download or shows a generated report"
+  },
+  {
+    "id": "TC-PP-R002",
+    "title": "Partner Filtreleme ve Sıralama",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "low",
+    "domain": "general",
+    "prompt": "Login to partner panel. Navigate to orders or products list. Test the filtering or sorting options. Apply a date filter or sort by status. Verify the list updates accordingly.",
+    "expectedOutcome": "Filter and sort functionality work and update the displayed data"
+  },
+  {
+    "id": "TC-INV-003",
+    "title": "Vendor Bulk Price Update",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to /dashboard/inventory/my-devices. Look for a bulk price update option (checkbox select multiple rows or 'Toplu Güncelle' button). Select at least 2 device rows. Enter a new price for bulk update. Confirm the action. Verify the API is called for each selected device. Verify all selected device rows show the updated price.",
+    "expectedOutcome": "Multiple device prices are updated in bulk. All selected rows reflect new prices without errors.",
+    "tcContext": "TC-INV-003: Vendor bulk price update. Priority: high. Domain: inventory/my-devices. Surface: partner-portal."
+  },
+  {
+    "id": "TC-INV-004",
+    "title": "Bidbook List",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to the bidbook or bid management section. Verify the bidbook list page renders with relevant columns (device, bid price, status, expiry). Verify at least one bid entry is visible or an appropriate empty state is shown.",
+    "expectedOutcome": "Bidbook list page loads. Columns and bids are visible or empty state is shown.",
+    "tcContext": "TC-INV-004: Bidbook list view. Priority: high. Domain: inventory. Surface: partner-portal."
+  },
+  {
+    "id": "TC-INV-005",
+    "title": "Bidbook — Make Offer",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to the bidbook section. Find an available device bid opportunity. Click 'Teklif Ver' or the offer button. Enter a bid price. Confirm the offer. Verify the offer is submitted (API returns 201). Verify the bid appears in the bidbook list with the submitted price.",
+    "expectedOutcome": "Bid offer is submitted successfully. New bid appears in the bidbook list with correct price and status.",
+    "tcContext": "TC-INV-005: Bidbook make offer. Priority: high. Domain: inventory. Surface: partner-portal."
+  },
+  {
+    "id": "TC-TI-003",
+    "title": "A/B Routing — Trade-In vs Standard Checkout",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "buyback",
+    "prompt": "As a customer on the website, add a device to cart. During checkout, verify that the A/B test routing either shows the trade-in discount path or the standard checkout path. Verify the correct flow is rendered consistently for the session. If trade-in path: verify trade-in offer is shown in cart. If standard path: verify normal checkout without trade-in UI.",
+    "expectedOutcome": "A/B routing correctly directs user to either trade-in or standard checkout. Both paths render without errors.",
+    "tcContext": "TC-TI-003: A/B routing trade-in vs standard checkout. Priority: medium. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-TI-004",
+    "title": "Cart Offer Binding — Price Lock",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Start a buyback/trade-in flow and receive a price offer. Add a device to cart with the trade-in offer applied. Verify the trade-in offer price is locked and shown as a discount in the cart. Wait or navigate away and return. Verify the locked price is still applied. Proceed to checkout and verify the trade-in discount is reflected in the order total.",
+    "expectedOutcome": "Trade-in price is locked and persists in cart. Discount is applied correctly at checkout.",
+    "tcContext": "TC-TI-004: Cart offer binding and price lock. Priority: high. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-TI-005",
+    "title": "Checkout — Trade-In Discount Applied",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "critical",
+    "domain": "buyback",
+    "prompt": "As an authenticated customer, complete the buyback question flow to receive a trade-in offer. Apply the trade-in offer to a cart with a device. Proceed to checkout. Verify the trade-in discount amount is correctly deducted from the device price. Complete payment. Verify the order is created with the discounted price and the trade-in lead is linked to the order.",
+    "expectedOutcome": "Trade-in discount is correctly applied at checkout. Order total reflects the deduction. Trade-in lead is associated with the order.",
+    "tcContext": "TC-TI-005: Checkout with trade-in discount applied. Priority: critical. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-TI-006",
+    "title": "Success Page — Order Created + Notification",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Complete a trade-in checkout flow. After payment, verify the success page renders. Verify the success page shows the order number. Verify the trade-in lead status is updated. Verify a success notification or email confirmation is triggered (check for success toast or confirmation UI element).",
+    "expectedOutcome": "Success page renders after trade-in checkout. Order number is displayed. Notification/confirmation is shown.",
+    "tcContext": "TC-TI-006: Success page after trade-in order created. Priority: high. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-TI-007",
+    "title": "Orders Page — Buyback Lead Status",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Login as an authenticated customer on the website. Navigate to the orders page (/siparislerim or equivalent). Find an order that has a linked buyback/trade-in lead. Verify the buyback lead status is displayed alongside the order (e.g. 'Değerlendirmede', 'Tamamlandı'). Verify clicking the trade-in status shows lead details.",
+    "expectedOutcome": "Orders page shows buyback lead status for orders with trade-in. Lead status is accurate and clickable.",
+    "tcContext": "TC-TI-007: Orders page buyback lead status display. Priority: high. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-TI-008",
+    "title": "Refund Logic — Cancel and Return",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Complete a trade-in checkout order. Cancel or return the order. Verify the refund process is initiated. Verify the trade-in lead is also cancelled or its status is updated accordingly. Verify the customer's payment is refunded (API confirms refund). Verify the UI shows the cancelled/refunded status.",
+    "expectedOutcome": "Order and linked trade-in lead are both cancelled. Refund is initiated. Statuses are updated correctly.",
+    "tcContext": "TC-TI-008: Refund logic for cancel and return with trade-in. Priority: high. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-TI-009",
+    "title": "Edge Case — Price Change and Lead Expire",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "buyback",
+    "prompt": "Get a trade-in price offer. Wait for the offer to expire (or simulate expiry). Attempt to use the expired offer at checkout. Verify an appropriate error or expiry message is shown. Also test: change the buyback price configuration in backoffice, then start a new quote flow and verify the updated price is reflected.",
+    "expectedOutcome": "Expired trade-in leads cannot be used at checkout — error message shown. Price changes in backoffice are reflected in new quote flows.",
+    "tcContext": "TC-TI-009: Edge case — price change and lead expiry. Priority: medium. Domain: trade-in/web."
+  },
+  {
+    "id": "TC-INV-006",
+    "title": "Vendor Views Flash Product Opportunities",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to /dashboard/opportunities. Verify the Flash Product / Opportunities page renders. Verify the list has columns: Ürün, İndirim Oranı, Başlangıç, Bitiş, Durum. Verify at least one campaign row is visible with product name, discount, dates, and status. Verify the status badge shows correct state (e.g. Aktif, Yaklaşan). Click on a campaign row and verify a campaign detail view opens showing product info, discount rate, stock allocation, and participation button.",
+    "expectedOutcome": "Flash Product opportunities page loads with correct columns and campaign data. Campaign detail view opens without errors.",
+    "tcContext": "TC-INV-006: Vendor views Flash Product opportunities. Priority: high. Domain: inventory/flash-product. Surface: partner-portal. API: GET /inventory/flash-product-campaigns."
+  },
+  {
+    "id": "TC-INV-007",
+    "title": "Vendor Joins a Flash Product Campaign",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to /dashboard/opportunities. Find an active campaign for iPhone 14 Pro with Aktif status. Click the 'Katıl' (Join) button. In the join confirmation modal, enter 3 in the Stok Miktarı (Stock Allocation) field. Click 'Onayla' (Confirm). Verify POST /inventory/flash-product-campaigns/{id}/join returns 200 OK or 201 Created. Verify the campaign row updates to show 'Katıldım' or equivalent joined status. Navigate to /dashboard/inventory/my-devices and verify iPhone 14 Pro row shows a flash campaign badge or discounted price indicator. Attempt joining the same campaign again and verify an error is shown.",
+    "expectedOutcome": "Vendor successfully joins a flash campaign. Success feedback shown. Campaign status updates to Katıldım. Device row shows campaign indicator. Duplicate join is blocked.",
+    "tcContext": "TC-INV-007: Vendor joins a Flash Product campaign. Priority: high. Domain: inventory/flash-product. Surface: partner-portal. API: POST /inventory/flash-product-campaigns/{id}/join."
+  },
+  {
+    "id": "TC-INV-008",
+    "title": "Vendor Views Fast Buy Opportunities",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as vendor. Navigate to /dashboard/opportunities. Click the 'Hızlı Satın Al' (Fast Buy) tab. Verify the Fast Buy opportunity list is displayed with columns: Ürün, Fiyat Eşiği, Talep Miktarı, Son Tarih, Durum. Verify at least one opportunity row shows product, price threshold, quantity, deadline, and status. Click the 'Detay' button on any row and verify an opportunity detail view opens with device specs and pricing info. Navigate back and verify the list reloads without errors.",
+    "expectedOutcome": "Fast Buy opportunities tab loads with correct columns. Detail view opens. Empty state shown if no opportunities exist.",
+    "tcContext": "TC-INV-008: Vendor views Fast Buy opportunities. Priority: medium. Domain: inventory/fast-buy. Surface: partner-portal. API: GET /inventory/fast-buy-opportunities."
+  },
+  {
+    "id": "TC-INV-009",
+    "title": "Public Catalog Search Returns Relevant Results",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "critical",
+    "domain": "inventory",
+    "prompt": "Send GET /inventory/catalog/search?q=iPhone+14+Pro. Verify 200 OK and at least 1 result matching iPhone 14 Pro. Verify each result has name, storage, colour, grade, price, stock fields. Send GET /inventory/catalog/search?q=Samsung. Verify Samsung Galaxy S23 is in results. Send GET /inventory/catalog/search?q=iPhone+14+Pro&grade=A. Verify all results have grade = 'A'. Send GET /inventory/catalog/search?q=ZZZ_NONEXISTENT_DEVICE_XYZ. Verify 200 OK with results: [] and total: 0.",
+    "expectedOutcome": "Search returns correct filtered results. Grade filter works. Empty results for unknown keyword returns 200 with empty array, not 404 or 500.",
+    "tcContext": "TC-INV-009: Public catalog search returns relevant results. Priority: critical. Domain: inventory/catalog. API: GET /inventory/catalog/search."
+  },
+  {
+    "id": "TC-INV-010",
+    "title": "BuyBox Winner Is Correctly Determined",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "inventory",
+    "prompt": "Authenticate as admin. Ensure 2 vendor VariantInventory records exist for iPhone 14 Pro 256GB: Vendor A (price 14999, rating 4.8, stock 10) and Vendor B (price 15499, rating 4.5, stock 5). Send GET /inventory/buybox?variantId={variantId}. Verify 200 OK and winner.vendorId matches Vendor A. Verify response includes winner.price, winner.rating, winner.stock matching Vendor A values. Update Vendor A price to 16000 via PATCH /inventory/variant-inventories/{id}. Re-send GET /inventory/buybox. Verify winner.vendorId now matches Vendor B. Verify vendor with stock:0 is excluded from BuyBox selection.",
+    "expectedOutcome": "BuyBox winner changes correctly when prices change. Initial winner is Vendor A (lower price, higher rating). After price increase, Vendor B wins. Zero-stock vendor is excluded.",
+    "tcContext": "TC-INV-010: BuyBox winner selection algorithm. Priority: high. Domain: inventory/buybox. API: GET /inventory/buybox, PATCH /inventory/variant-inventories/{id}."
+  },
+  {
+    "id": "TC-INV-011",
+    "title": "B2B Catalog Listing and Filtering",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "inventory",
+    "prompt": "Login to partner portal as B2B-enabled vendor. Navigate to /dashboard/inventory/b2b-catalog. Verify page renders with columns: Model, Üretici, Kategori, Derece, Fiyat, Stok. Verify both iPhone 14 Pro and Samsung Galaxy S23 appear in the list. Select 'Apple' from the Üretici (Manufacturer) filter dropdown. Verify only Apple devices are shown. Clear filter and select grade 'A' from Derece filter. Verify all visible rows show grade A. Clear all filters and verify the full catalog reloads. Test: access page as vendor without B2B access and verify redirect or access-denied message.",
+    "expectedOutcome": "B2B catalog loads with correct columns. Manufacturer and grade filters work correctly. Non-B2B vendor cannot access the catalog.",
+    "tcContext": "TC-INV-011: B2B catalog listing and filtering. Priority: medium. Domain: inventory/b2b-catalog. Surface: partner-portal. API: GET /inventory/b2b-models."
+  },
+  {
+    "id": "TC-BB-005",
+    "title": "Vendor Views Courier Buyback Leads in Partner Portal",
+    "platform": ["partner"],
+    "tags": ["regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Login to Partner Portal as vendor. Navigate to /dashboard/buyback/leads. Verify the buyback leads list page renders. Verify table columns: Müşteri, Cihaz, Kanal, Durum, Teklif Fiyatı, Tarih. Verify the target courier lead (OFFER_ACCEPTED state) appears in the list. Verify Kanal column shows 'Kurye'. Verify Durum column shows 'Teklif Kabul Edildi'. Apply status filter 'Teklif Kabul Edildi' and verify only matching leads shown. Click the lead row and verify detail page opens showing device info, offer price, customer address, and courier tracking number.",
+    "expectedOutcome": "Vendor sees courier buyback leads with correct columns, statuses, and filter behavior. Lead detail page loads completely.",
+    "tcContext": "TC-BB-005: Vendor views courier buyback leads in Partner Portal. Priority: high. Domain: buyback/lead-management. Surface: partner-portal. API: GET /buyback/leads."
+  }
+]

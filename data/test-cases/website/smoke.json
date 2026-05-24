@@ -1,0 +1,58 @@
+[
+  {
+    "id": "TC-IDENTITY-009",
+    "title": "Customer OTP Login — Happy Path (Sepet Akışı)",
+    "platform": ["website"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to https://preprod.getmobil.com. Verify the Getmobil logo is visible in the header. Click the cart icon in the top-right header. Verify redirect to https://preprod.getmobil.com/sepetim/ — Sepetim page loads. Click the 'Alışverişe Başla' button. Verify redirect to PLP at /satin-al/cep-telefonu/ — product listing is displayed. Find 'Apple iPhone 15 Pro Max 512 GB Mavi Titanyum' and click on it. Verify PDP loads for this product. Click the orange 'Peşin fiyatına taksit fırsatı ile Hızlı Al' button. Verify a pop-up modal opens with heading 'Getmobil'e Hoşgeldiniz!'. Click the 'Giriş Yap / Üye Ol' button. Verify phone number input screen with +90 Turkey flag prefix. Enter 5392295806 in the Cep Telefonu Numarası field (without country code). Click 'Devam et'. Verify OTP input screen is displayed. Enter 65099 in the OTP fields. Click 'Doğrula'. Verify toast notification 'Başarılı Bir Şekilde Giriş Yaptınız' appears. Click the Getmobil logo in the top-left header. Verify homepage loads and user is authenticated. NOTE: This flow adds a product to cart as a side effect — cart cleanup may be needed for subsequent tests.",
+    "expectedOutcome": "Customer successfully logs in via OTP using the cart → PLP → PDP → Hızlı Al flow. Toast 'Başarılı Bir Şekilde Giriş Yaptınız' shown. Homepage loads authenticated. NOTE: profil ikonu (SVG) is not accessible by the page agent — login must be triggered via the Hızlı Al button.",
+    "tcContext": "TC-IDENTITY-009: Customer OTP login — happy path (sepet üzerinden). Priority: critical. Domain: identity/authentication. Surface: getmobil-website. Fixture: FIXTURE-USER-CUSTOMER-001. Phone: 5392295806, Static OTP: 65099. Known limitation: header profil SVG icon is not detectable by page agent — login flow uses cart → PLP → PDP → Hızlı Al path. Side effect: adds product to cart."
+  },
+  {
+    "id": "TC-IDENTITY-010",
+    "title": "Customer OTP Register — New User Happy Path",
+    "platform": ["website"],
+    "tags": ["smoke"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to ${GETMOBIL_WEB_URL}. Click the user icon in the top-right corner. Verify modal with heading 'Getmobil'e Hoşgeldiniz!' opens. Enter a NEW phone number (not registered) in the Cep Telefonu Numarası field. Click 'Devam et'. Verify the register form appears with heading 'Getmobil'e Ücretsiz Kaydol' and description 'Getmobil'e kayıt ol, hayalindeki telefona çok daha uygun fiyatlarla sahip ol!'. Verify the phone field is pre-filled with +90 prefix and is read-only. Enter first name, last name, and email. Click 'Devam et'. Verify OTP input screen appears. Enter OTP 65099. Click 'Doğrula'. Verify success toast appears. Verify modal closes. Verify header user icon reflects authenticated state. Verify localStorage['getmobil_access_token'] contains a non-empty JWT. NOTE: Clean up the created user from the users table after the test.",
+    "expectedOutcome": "New customer is registered via OTP. Register form shows correct heading. Phone is pre-filled. Session token is created and stored in localStorage. Modal closes after registration.",
+    "tcContext": "TC-IDENTITY-010: Customer OTP register — new user happy path. Priority: critical. Domain: identity/authentication. Surface: getmobil-website. Cleanup required: delete created user from users table after test run."
+  }
+,
+  {
+    "id": "TC-BB-001",
+    "title": "Create Buyback Lead — GETMOBIL Kurye Kanalı (Happy Path)",
+    "platform": ["website"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "buyback",
+    "prompt": "Navigate to ${GETMOBIL_WEB_URL}. Click the 'Telefon Sat' link in the navbar. On the device selection screen, select brand Apple, model iPhone 16 Pro Max, storage 1 TB. Select 'Yurt içi'. Click 'Devam Et'. In the popup, enter the registered customer phone number ${TEST_BUYBACK_USER_PHONE}. Click 'Devam Et'. Enter the OTP received. Click 'Doğrula'. Fill in TC Kimlik No, İl (İstanbul), İlçe (Kadıköy), Mahalle, and address details. Select 'IBAN' payment method and enter ${TEST_BUYBACK_IBAN}. Select 'Kurye ile Teslimat'. Choose the first available date and time slot. Click 'Hemen Sat'. Verify the success screen appears. For Apple device courier lead, verify 'Cihazınızı Apple ile Test Edin' text is shown (Diagnostics flow - TC-BB-023). Click 'Talebi Gör' and verify navigation to /profil/sattiklarim/detay/{leadId}/. Verify DB: buyback_leads.status = 'WAITING_CONFIRMATION', actor = 'CUSTOMER', channel = 'GETMOBIL'.",
+    "expectedOutcome": "Buyback lead is created successfully via GETMOBIL courier channel. Status = WAITING_CONFIRMATION, actor = CUSTOMER. Apple device triggers diagnostics screen.",
+    "tcContext": "TC-BB-001: Create buyback lead — GETMOBIL kurye kanalı. 4 actor flows: CUSTOMER (OTP login), GUEST, GUEST→CUSTOMER (Getpuan üye ol), YENİ KULLANICI. Priority: critical. Amount formula: IBAN=pre_offer, IBAN+referral=pre_offer+750, Getpuan=pre_offer×1.20, Getpuan+referral=(pre_offer×1.20)+750."
+  },
+  {
+    "id": "TC-BB-022",
+    "title": "Create Buyback Lead — GETMOBIL Kargo Kanalı (Happy Path)",
+    "platform": ["website"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "buyback",
+    "prompt": "Navigate to ${GETMOBIL_WEB_URL}. Click the 'Telefon Sat' link in the navbar. Select brand Apple, model iPhone 16 Pro Max, storage 1 TB. Select 'Yurt içi'. Click 'Devam Et'. In the popup, enter the registered customer phone number ${TEST_BUYBACK_USER_PHONE}. Click 'Devam Et'. Enter OTP, click 'Doğrula'. Fill TC Kimlik No, İl (Ankara), İlçe (Çankaya), Mahalle, address details. Select 'IBAN' payment method and enter ${TEST_BUYBACK_IBAN}. Select 'Kargo ile Gönderim'. Verify Yurtiçi Kargo is shown and no date/time slot selection screen appears. Click 'Hemen Sat'. Verify success screen shows 'Tebrikler', 'Talebiniz Başarı ile Oluşturuldu' texts. Verify NO diagnostics screen is shown (kargo leads do not trigger diagnostics). Click 'Talebi Gör' and verify navigation to /profil/sattiklarim/detay/{leadId}/. Verify DB: buyback_leads.status = 'WAITING_CONFIRMATION', actor = 'CUSTOMER', channel = 'GETMOBIL'.",
+    "expectedOutcome": "Buyback lead created via GETMOBIL kargo channel. Success screen shows 'Tebrikler'. No diagnostics screen. DB status = WAITING_CONFIRMATION.",
+    "tcContext": "TC-BB-022: Create buyback lead — GETMOBIL kargo kanalı. Kargo channel has no date/time slot, no city restriction, no diagnostics. Yurtiçi Kargo firm. Priority: critical."
+  },
+  {
+    "id": "TC-BB-023",
+    "title": "Web Diagnostics — Apple Cihaz Kurye Buyback Lead Sonrası Tanılama",
+    "platform": ["website"],
+    "tags": ["smoke"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "After TC-BB-001 creates a GETMOBIL courier Apple device buyback lead, on the success page verify 'Cihazınızı Apple ile Test Edin' text is shown. Verify info texts: 'Fiyat Garantisi', 'Hızlı Teslimat', '15K+', '98%', '2-3 dk' are visible. Click 'Test Başla'. On the 'Apple Diagnostic Testi' screen, try entering a non-numeric character in the IMEI field and verify it is rejected. Enter ${TEST_APPLE_DEVICE_IMEI} (15-digit IMEI). Click 'Teste Başla'. Verify 'Başlatılıyor' placeholder appears. Verify QR code and Safari redirection sections are shown. Scan QR with mobile or use Safari URL to start diagnostics. Verify GET /api/buyback/device-diagnostics/sessions/by-lead/{leadId}/ returns status = 'IN_PROGRESS'. After completion, verify status = 'ARCHIVED'. Verify 'Apple Diagnostic Başarıyla Tamamlandı' is shown on the page. Verify IMEI and test results are listed.",
+    "expectedOutcome": "Apple diagnostics flow completes successfully. IN_PROGRESS then ARCHIVED status. Completion screen shows IMEI and test results.",
+    "tcContext": "TC-BB-023: Web diagnostics — Apple cihaz kurye buyback lead sonrası. Only triggered for courier (not kargo) Apple device leads. Priority: high."
+  }
+]

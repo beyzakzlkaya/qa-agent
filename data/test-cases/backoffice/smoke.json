@@ -1,0 +1,159 @@
+[
+  {
+    "id": "TC-BO-001",
+    "title": "Admin Login Flow",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to the backoffice login page. Enter the admin credentials from the system prompt (username and password). Click the login button. Verify that the dashboard loads successfully and the admin navigation menu is visible.",
+    "expectedOutcome": "Dashboard page is loaded and admin navigation menu is visible after login"
+  },
+  {
+    "id": "TC-BO-002",
+    "title": "Admin Logout",
+    "platform": ["backoffice"],
+    "tags": ["smoke"],
+    "priority": "high",
+    "domain": "identity",
+    "prompt": "Login to backoffice with admin credentials. Once on the dashboard, find and click the logout button or user menu. Complete the logout process. Verify the page redirects to the login screen.",
+    "expectedOutcome": "User is redirected to the login page after logout"
+  },
+  {
+    "id": "TC-BO-003",
+    "title": "Kullanıcı Listesi Görüntüleme",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "high",
+    "domain": "general",
+    "prompt": "Login to backoffice with admin credentials. Navigate to the Users or Customers section from the main menu. Verify that the user list is displayed with at least one record.",
+    "expectedOutcome": "User list page is visible with a table or grid showing user records"
+  },
+  {
+    "id": "TC-BO-004",
+    "title": "Sipariş Listesi Görüntüleme",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "high",
+    "domain": "order",
+    "prompt": "Login to backoffice with admin credentials. Navigate to the Orders section from the main menu. Verify that the orders list is displayed.",
+    "expectedOutcome": "Orders list is visible with order records in a table"
+  },
+  {
+    "id": "TC-BO-005",
+    "title": "Ürün Listesi Görüntüleme",
+    "platform": ["backoffice"],
+    "tags": ["smoke"],
+    "priority": "medium",
+    "domain": "inventory",
+    "prompt": "Login to backoffice with admin credentials. Navigate to the Products section. Verify that the product catalog is visible.",
+    "expectedOutcome": "Products list page is visible with at least one product entry"
+  },
+  {
+    "id": "TC-BO-006",
+    "title": "Arama Fonksiyonu",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "general",
+    "prompt": "Login to backoffice with admin credentials. Find the global search bar or search functionality. Type 'test' in the search box. Verify that search results appear or an appropriate no-results message is shown.",
+    "expectedOutcome": "Search results page or results dropdown is displayed after typing in search box"
+  },
+  {
+    "id": "TC-BO-007",
+    "title": "Dashboard İstatistikler",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "medium",
+    "domain": "general",
+    "prompt": "Login to backoffice with admin credentials. On the dashboard page, verify that statistics widgets or cards are visible (such as total orders, revenue, active users).",
+    "expectedOutcome": "Dashboard shows at least 3 statistics widgets or KPI cards"
+  },
+  {
+    "id": "TC-BO-008",
+    "title": "Hata Sayfası 404 Kontrolü",
+    "platform": ["backoffice"],
+    "tags": ["regression"],
+    "priority": "low",
+    "domain": "general",
+    "prompt": "Navigate to the backoffice URL and append '/nonexistent-page-xyz' to test the 404 handling. Verify that a proper error or redirect page is shown instead of a blank screen.",
+    "expectedOutcome": "A 404 page or redirect to login/dashboard is shown, not a blank white screen"
+  },
+  {
+    "id": "TC-BO-009",
+    "title": "Admin Signs In to Backoffice — Happy Path",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Verify the page loads with HTTP 200. Verify the left-side decorative image is rendered (non-zero dimensions, no broken src). Verify the 'Giriş' heading is present and visible. Verify the 'Giriş için email ve şifrenizi giriniz' subtitle text is visible within 3s of navigation. Enter ${TEST_ADMIN_EMAIL} into the Email input field. Enter ${TEST_ADMIN_PASSWORD} into the Password field — verify characters are masked (type=\"password\"). Click the show/hide password toggle and verify password characters become visible (type=\"text\"); click again and verify characters are masked again (type=\"password\"). Click the 'Giriş' button. Verify the user is redirected to the backoffice dashboard — the sign-in URL is NOT the final URL and no authentication error banner is displayed.",
+    "expectedOutcome": "Admin is redirected to the backoffice dashboard. Page heading ('Giriş') and subtitle are correct. Left-side image is rendered. Password toggle switches between text and password types correctly. No error banner shown after login.",
+    "tcContext": "TC-BO-009: Admin signs in to Backoffice with valid credentials. Priority: critical. Domain: backoffice/authentication. Fixture: FIXTURE-USER-ADMIN-001. Precondition: SHARED-PRE-002. API: POST /identity/auth/token. Steps: Navigate to sign-in, verify all page elements, enter credentials, test password visibility toggle (show then hide), submit and verify dashboard redirect with no error banner."
+  },
+  {
+    "id": "TC-BO-010",
+    "title": "Dealer-Owner Role Blocked from Backoffice",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "identity",
+    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Enter ${TEST_VENDOR_EMAIL} (dealer-owner) into the Email input field. Enter ${TEST_VENDOR_PASSWORD} into the Password field. Click the 'Giriş' button. Verify the login is rejected — the user is NOT redirected away from ${BACKOFFICE_URL}/authentication/sign-in/. Verify a visible error banner or inline message appears on the sign-in page (e.g. 'Bu hesap backoffice'e erişim iznine sahip değil' or equivalent). Verify no authenticated session is created. Verify the page does NOT remain blank or in an infinite spinner state.",
+    "expectedOutcome": "Dealer-owner is blocked from accessing backoffice. URL remains on the sign-in page. Error message is visible. No authenticated session or dashboard access. Page remains responsive.",
+    "tcContext": "TC-BO-010: Dealer-owner (bayi sahibi) role is blocked from accessing Backoffice. Priority: critical. Domain: backoffice/authentication/rbac. Fixture: FIXTURE-USER-VENDOR-001. API: POST /identity/auth/token. Steps: Navigate to sign-in, enter vendor credentials, click Giriş, verify rejection, error message, no dashboard redirect, no session, no blank/spinner page."
+  },
+  {
+    "id": "TC-TI-010",
+    "title": "Backoffice Buyback Lead Management",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "buyback",
+    "prompt": "Login to backoffice with admin credentials. Navigate to the buyback or trade-in lead management section. Verify that the buyback lead list is visible with relevant columns (lead ID, status, customer info, device info). Apply a status filter if available. Click on a lead to view details. Verify lead detail page shows complete information.",
+    "expectedOutcome": "Backoffice admin can view and manage buyback leads. Lead list is displayed with filters, and lead detail page loads correctly.",
+    "tcContext": "TC-TI-010: Backoffice buyback lead management. Priority: critical. Domain: trade-in/backoffice. Steps: Login, navigate to buyback leads, verify list, filter by status, view lead detail."
+  },
+  {
+    "id": "TC-BB-002",
+    "title": "Customer Accepts Buyback Offer",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "buyback",
+    "prompt": "Authenticate as customer via POST /identity/auth/token. GET /buyback/leads/{leadId} and verify status = 'OFFER_READY'. GET /buyback/offers/{leadId} and verify offerPrice > 0. POST /buyback/leads/{leadId}/accept with Authorization bearer token. Verify 200 OK. GET /buyback/leads/{leadId} again and verify status = 'OFFER_ACCEPTED'. Verify lead.acceptedAt is a valid ISO 8601 datetime. Verify lead.courier.trackingNumber is non-null (courier channel). Attempt second POST .../accept and verify 409 Conflict is returned.",
+    "expectedOutcome": "Lead transitions to OFFER_ACCEPTED status. acceptedAt is set. Courier trackingNumber is present. Double acceptance is blocked with 409.",
+    "tcContext": "TC-BB-002: Customer accepts buyback offer. Priority: critical. Domain: buyback/offer-management. API: POST /buyback/leads/{id}/accept. Precondition: lead in OFFER_READY state."
+  },
+  {
+    "id": "TC-BB-003",
+    "title": "Customer Rejects Buyback Offer",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Authenticate as customer via POST /identity/auth/token. GET /buyback/leads/{leadId} and verify status = 'OFFER_READY'. GET /buyback/offers/{leadId} and verify offerPrice > 0. POST /buyback/leads/{leadId}/reject with Authorization bearer token. Verify 200 OK. GET /buyback/leads/{leadId} and verify status = 'OFFER_REJECTED'. Verify lead.rejectedAt is a valid ISO 8601 datetime. Verify lead.courier is null or absent. Verify no BuybackVoucherCode record was created for this lead. Attempt POST .../accept after rejection and verify 409 Conflict is returned.",
+    "expectedOutcome": "Lead transitions to OFFER_REJECTED. rejectedAt is set. No courier scheduled. No payout issued. Post-rejection accept is blocked with 409.",
+    "tcContext": "TC-BB-003: Customer rejects buyback offer. Priority: high. Domain: buyback/offer-management. API: POST /buyback/leads/{id}/reject."
+  },
+  {
+    "id": "TC-BB-005",
+    "title": "Vendor Views Courier Buyback Leads",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "high",
+    "domain": "buyback",
+    "prompt": "Login to Partner Portal as vendor. Navigate to /dashboard/buyback/leads. Verify the page renders. Verify the table has columns: Müşteri, Cihaz, Kanal, Durum, Teklif Fiyatı, Tarih. Verify the target courier lead (OFFER_ACCEPTED state) appears in the list. Verify the Kanal column shows 'Kurye' for the lead. Verify the Durum column shows 'Teklif Kabul Edildi'. Apply status filter 'Teklif Kabul Edildi' and verify only matching leads are shown. Click on the lead row and verify lead detail page opens with device info, offer price, customer address, and courier tracking number visible.",
+    "expectedOutcome": "Vendor can view courier buyback leads list with correct columns and statuses. Filter works. Lead detail page loads with full information.",
+    "tcContext": "TC-BB-005: Vendor views courier buyback leads in Partner Portal. Priority: high. Domain: buyback/lead-management. API: GET /buyback/leads. Surface: partner-portal."
+  },
+  {
+    "id": "TC-BB-009",
+    "title": "Buyback Payout Voucher Generation",
+    "platform": ["backoffice"],
+    "tags": ["smoke", "regression"],
+    "priority": "critical",
+    "domain": "buyback",
+    "prompt": "Authenticate as admin in Backoffice. GET /buyback/leads/{leadId} and verify status = 'COMPLETED'. POST /buyback/leads/{leadId}/generate-voucher with admin token. Verify 201 Created. Verify response includes voucherCode (non-null) and amount. Verify voucher.amount === offer.offerPrice. GET /buyback/vouchers/{voucherCode} and verify status = 'ACTIVE'. Verify voucher.leadId matches the target leadId. Attempt second POST .../generate-voucher for the same lead and verify 409 Conflict. Verify calling generate-voucher on a lead in OFFER_ACCEPTED (not COMPLETED) state returns 422.",
+    "expectedOutcome": "Voucher generated with 201. Amount matches offer price. Status is ACTIVE. Duplicate generation blocked with 409. Incomplete lead returns 422.",
+    "tcContext": "TC-BB-009: Buyback payout voucher generation. Priority: critical. Domain: buyback/payout. API: POST /buyback/leads/{id}/generate-voucher, GET /buyback/vouchers/{code}. Precondition: lead in COMPLETED state."
+  }
+]

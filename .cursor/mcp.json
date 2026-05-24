@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "qa-agent": {
+      "command": "npx",
+      "args": ["tsx", "scripts/mcp-server.ts"],
+      "cwd": "/Users/beyzakizilkaya/Desktop/qa-agent",
+      "description": "QA Agent — PageAgent tabanlı browser test otomasyon aracı. Getmobil backoffice, partner ve website platformları için test case çalıştırır."
+    }
+  }
+}

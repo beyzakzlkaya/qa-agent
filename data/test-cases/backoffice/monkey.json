@@ -1,0 +1,29 @@
+[
+  {
+    "id": "TC-BO-M001",
+    "title": "Rastgele Menü Navigasyonu",
+    "platform": ["backoffice"],
+    "tags": ["monkey"],
+    "priority": "low",
+    "prompt": "Login to backoffice with admin credentials. Randomly click through different menu items and navigation links. Click on at least 5 different sections. Note any errors, broken pages, or unexpected behavior. Report any 500 errors or blank pages.",
+    "expectedOutcome": "All navigation links work without server errors or blank pages"
+  },
+  {
+    "id": "TC-BO-M002",
+    "title": "Form Sınır Değer Testi",
+    "platform": ["backoffice"],
+    "tags": ["monkey"],
+    "priority": "medium",
+    "prompt": "Login to backoffice with admin credentials. Find any form (search, filter, or creation form). Test edge cases: enter very long text (200+ characters), enter special characters (<script>alert('xss')</script>), enter empty values. Verify the application handles these gracefully.",
+    "expectedOutcome": "Application handles edge case inputs gracefully without crashes or XSS vulnerabilities"
+  },
+  {
+    "id": "TC-BO-M003",
+    "title": "Hızlı Çoklu Tıklama Testi",
+    "platform": ["backoffice"],
+    "tags": ["monkey"],
+    "priority": "low",
+    "prompt": "Login to backoffice with admin credentials. Find a button or action that might cause issues with double-clicking (like save, submit, or delete). Click it rapidly multiple times. Verify the application handles duplicate submissions gracefully.",
+    "expectedOutcome": "Rapid clicking does not cause duplicate records or application errors"
+  }
+]

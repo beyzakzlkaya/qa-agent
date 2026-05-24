@@ -1,0 +1,37 @@
+{
+  "credentials": {
+    "backoffice": {
+      "username": "beyza.kizilkaya@getmobil.com",
+      "password": "Ts6161++"
+    },
+    "partner": {
+      "username": "beyza@test.com",
+      "password": "test123*"
+    },
+    "website": {
+      "testPhoneNumber": "+90 552 923 6140",
+      "otpCode": "65099"
+    }
+  },
+  "testCards": {
+    "visa": {
+      "number": "4032800000000007",
+      "expiry": "12/36",
+      "cvv": "078"
+    },
+    "mastercard": {
+      "number": "5500 0000 0000 0004",
+      "expiry": "12/26",
+      "cvv": "456"
+    }
+  },
+  "otp": {
+    "defaultCode": "65099",
+    "testPhoneNumber": "+90 552 923 6140"
+  },
+  "commonData": {
+    "testEmail": "beyza.kizilkaya@getmobil.com",
+    "testPhone": "+90 552 923 6140",
+    "testName": "Beyza Test"
+  }
+}

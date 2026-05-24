@@ -1,0 +1,32 @@
+# Node
+node_modules/
+.next/
+dist-server/
+out/
+
+# Env
+.env
+.env.local
+.env*.local
+
+# Sensitive test data — commit only the .example template
+data/system-prompt.json
+
+# SQLite database
+*.db
+*.sqlite
+
+# Screenshots (generated at runtime — large binary files)
+data/screenshots/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.vscode/
+.idea/
