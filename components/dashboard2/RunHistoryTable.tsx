@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, forwardRef } from "react";
-import { Run, mockErrorMap } from "@/lib/mockData";
+import { useState, useEffect, forwardRef } from "react";
+import { Run } from "@/lib/mockData";
+import type { CaseResult } from "@/lib/types";
 import {
   ExternalLink,
   Play,
   ChevronDown,
   ChevronRight,
+  Loader2,
+  CheckCircle2,
+  XCircle,
   X,
 } from "lucide-react";
 
@@ -46,10 +50,45 @@ function StatusBadge({ status }: { status: Run["status"] }) {
   );
 }
 
+function deriveErrorType(message: string): string {
+  const m = message.trim();
+  const colonIdx = m.indexOf(":");
+  if (colonIdx > 0 && colonIdx < 60) {
+    const head = m.slice(0, colonIdx);
+    if (/^[A-Z][A-Za-z0-9_]*Error$/.test(head)) return head;
+  }
+  if (/timeout/i.test(m)) return "TimeoutError";
+  if (/assert/i.test(m)) return "AssertionError";
+  return "Error";
+}
+
 function ExpandedRow({ run }: { run: Run }) {
-  const isTimeout =
-    run.name.toLowerCase().includes("kupon") || run.duration.includes("m");
-  const err = isTimeout ? mockErrorMap.timeout : mockErrorMap.default;
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [cases, setCases] = useState<CaseResult[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+    fetch(`/api/runs/${run.id}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as { caseResults: CaseResult[] };
+        if (!cancelled) setCases(data.caseResults ?? []);
+      })
+      .catch((e: unknown) => {
+        if (!cancelled) setError(e instanceof Error ? e.message : "Yüklenemedi");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [run.id]);
+
+  const failedCases = cases.filter((c) => c.status === "failed" && c.errorMessage);
 
   return (
     <tr>
@@ -60,9 +99,16 @@ function ExpandedRow({ run }: { run: Run }) {
               <p className="text-xs font-semibold text-foreground mb-0.5">
                 {run.name}
               </p>
-                      <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/30">
-                        {err.errorType}
-                      </span>
+              {run.status === "failed" && failedCases.length > 0 && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/30">
+                  {deriveErrorType(failedCases[0].errorMessage!)}
+                </span>
+              )}
+              {run.status === "passed" && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/30">
+                  Geçti
+                </span>
+              )}
             </div>
             <div className="flex gap-2">
               <button className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:bg-accent transition-colors">
@@ -75,18 +121,96 @@ function ExpandedRow({ run }: { run: Run }) {
               </button>
             </div>
           </div>
-          <div className="bg-muted/40 dark:bg-black/60 rounded-md p-3 font-mono space-y-1">
-            {err.stackTrace.map((line, i) => (
-              <p
-                key={i}
-                className={`text-[11px] ${
-                  i === 0 ? "text-destructive" : "text-muted-foreground"
-                }`}
-              >
-                {line}
-              </p>
-            ))}
-          </div>
+
+          {loading && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Detaylar yükleniyor...
+            </div>
+          )}
+
+          {error && !loading && (
+            <div className="text-xs text-destructive">
+              Detaylar yüklenemedi: {error}
+            </div>
+          )}
+
+          {!loading && !error && cases.length === 0 && (
+            <div className="text-xs text-muted-foreground">
+              Bu koşum için kayıtlı test case sonucu yok.
+            </div>
+          )}
+
+          {!loading && !error && failedCases.length > 0 && (
+            <div className="space-y-2">
+              {failedCases.map((c) => (
+                <div
+                  key={c.id}
+                  className="bg-muted/40 dark:bg-black/60 rounded-md p-3 font-mono space-y-1"
+                >
+                  <p className="text-[11px] text-muted-foreground/80">
+                    {c.caseId} · {c.platform}
+                  </p>
+                  {c.errorMessage!.split("\n").map((line, i) => (
+                    <p
+                      key={i}
+                      className={`text-[11px] ${
+                        i === 0 ? "text-destructive" : "text-muted-foreground"
+                      }`}
+                    >
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!loading && !error && run.status !== "failed" && cases.length > 0 && (
+            <div className="space-y-3">
+              {cases.map((c) => (
+                <div key={c.id} className="border border-border rounded-md p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-semibold text-foreground">
+                      {c.caseId}{" "}
+                      <span className="text-muted-foreground font-normal">
+                        · {c.platform}
+                      </span>
+                    </p>
+                    <span className="text-[10px] text-muted-foreground">
+                      {c.status}
+                    </span>
+                  </div>
+                  {c.steps.length === 0 ? (
+                    <p className="text-[11px] text-muted-foreground">
+                      Adım kaydedilmemiş.
+                    </p>
+                  ) : (
+                    <ol className="space-y-1">
+                      {c.steps.map((s) => (
+                        <li
+                          key={s.index}
+                          className="flex items-start gap-2 text-[11px]"
+                        >
+                          {s.status === "success" ? (
+                            <CheckCircle2 className="w-3 h-3 mt-0.5 text-success shrink-0" />
+                          ) : s.status === "failed" ? (
+                            <XCircle className="w-3 h-3 mt-0.5 text-destructive shrink-0" />
+                          ) : (
+                            <span className="w-3 h-3 mt-0.5 rounded-full border border-muted-foreground/40 shrink-0" />
+                          )}
+                          <span className="text-muted-foreground">
+                            <span className="text-foreground">{s.index}.</span>{" "}
+                            {s.description}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </td>
     </tr>
