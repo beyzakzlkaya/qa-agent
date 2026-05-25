@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import type { TestCase, PrAnalysis } from "@/lib/types";
 import type { FullTaskContext } from "@/app/api/jira/full-context/[key]/route";
 import { RiskSummaryPanel } from "@/components/jira-pipeline/RiskSummaryPanel";
+import { QaEffortPanel } from "@/components/jira-pipeline/QaEffortPanel";
 import { TaskContextPanel } from "@/components/jira-pipeline/TaskContextPanel";
 import { PrChangesPanel } from "@/components/jira-pipeline/PrChangesPanel";
 import { PreviousIterationsPanel } from "@/components/jira-pipeline/PreviousIterationsPanel";
@@ -449,6 +450,9 @@ export default function JiraTaskDetailPage() {
 
         {/* Risk summary — streaming */}
         <RiskSummaryPanel taskKey={taskKey} active={!generating} />
+
+        {/* QA effort estimate — manual trigger */}
+        <QaEffortPanel taskKey={taskKey} />
 
         {/* Two-column context */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">

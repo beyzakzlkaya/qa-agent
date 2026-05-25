@@ -37,7 +37,7 @@ async function main() {
   httpServer.listen(port, () => {
     console.log(`> Next.js sunucusu hazır: http://localhost:${port}`);
     console.log(`> WebSocket endpoint: ws://localhost:${port}/ws`);
-    console.log(`> Bridge: npm run bridge → port ${process.env.PAGE_AGENT_PORT || "38401"}`);
+    console.log(`> Bridge: test koşumunda otomatik başlatılır (port ${process.env.PAGE_AGENT_PORT || "38401"})`);
   });
 
   function shutdown(signal: string) {

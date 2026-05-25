@@ -374,6 +374,43 @@ export function getJiraIterations(jiraKey: string): JiraTaskIterationRow[] {
     .all(jiraKey) as JiraTaskIterationRow[];
 }
 
+// ─── JIRA QA effort estimate cache ────────────────────────────────────────────
+
+export interface JiraQaEffortRow {
+  jira_key: string;
+  input_hash: string;
+  payload_json: string;
+  case_count: number;
+  total_minutes: number;
+  created_at: string;
+}
+
+export function getCachedQaEffort(
+  jiraKey: string,
+  inputHash: string
+): JiraQaEffortRow | null {
+  const db = getDb();
+  const row = db
+    .prepare(`SELECT * FROM jira_qa_effort WHERE jira_key = ? AND input_hash = ?`)
+    .get(jiraKey, inputHash) as JiraQaEffortRow | undefined;
+  return row ?? null;
+}
+
+export function saveQaEffort(
+  jiraKey: string,
+  inputHash: string,
+  payloadJson: string,
+  caseCount: number,
+  totalMinutes: number
+): void {
+  const db = getDb();
+  db.prepare(
+    `INSERT OR REPLACE INTO jira_qa_effort
+       (jira_key, input_hash, payload_json, case_count, total_minutes, created_at)
+     VALUES (?, ?, ?, ?, ?, datetime('now'))`
+  ).run(jiraKey, inputHash, payloadJson, caseCount, totalMinutes);
+}
+
 // ─── Trend Analytics ──────────────────────────────────────────────────────────
 
 export interface DailyTrendRow {

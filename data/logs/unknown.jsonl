@@ -60,3 +60,16 @@
 {"type":"execute","ts":"2026-05-24T21:27:39.530Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Verilen talimatlara göre Backoffice preprod ortamında refurbishment / Ön Kontrol ekranındaki mekanik adımda kilitli kartların render ve state persista"}
 {"type":"execute","ts":"2026-05-24T21:41:09.838Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Test tamamlanamadı. Telefon Sat akışında cihaz ve durum bilgilerini girip \"Teklifi gör\" butonuna tıkladıktan sonra, https://preprod.getmobil.com sekme"}
 {"type":"execute","ts":"2026-05-24T22:15:41.519Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Tarayıcı durumunda, ‘Fiyat teklifi alın’ butonuna tıkladıktan sonra oluşması beklenen yeni UI (kondisyon soruları, teklif veya teslimat/şehir adımı) i"}
+{"type":"execute","ts":"2026-05-25T13:18:28.136Z","runId":"unknown","caseId":"unknown","model":"gpt-5.1","message":"Görev başlatıldı: You are a QA automation agent. The browser is already open on https://preprod-backoffice.getmobil.com/.\n\nActions you can..."}
+{"type":"error","ts":"2026-05-25T13:18:28.139Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"execute","ts":"2026-05-25T13:19:35.127Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Verilen test talimatındaki adımları uygulamak için gereken gerçek backoffice uygulamasına ve ilgili backend API ortamına bu QA Agent arayüzü üzerinden"}
+{"type":"error","ts":"2026-05-25T13:39:25.552Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"error","ts":"2026-05-25T13:39:25.558Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"error","ts":"2026-05-25T13:39:25.559Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"error","ts":"2026-05-25T13:39:25.562Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"error","ts":"2026-05-25T13:39:25.564Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"error","ts":"2026-05-25T13:39:25.565Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"execute","ts":"2026-05-25T13:39:30.991Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Verilen talimatlara göre gerçek backoffice uygulamasına erişip adımları tarayıcıda uygulamam bekleniyordu. Ancak mevcut QA Agent arayüzünde yalnızca d"}
+{"type":"error","ts":"2026-05-25T15:45:17.755Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"error","ts":"2026-05-25T15:45:17.760Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
+{"type":"execute","ts":"2026-05-25T15:45:31.781Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Verdiğiniz adımları uygulamak için Backoffice Ceza Havuzu ekranına erişmem gerekiyor, ancak mevcut ortamda açtığım backoffice sekmesi `undefined` URL/"}

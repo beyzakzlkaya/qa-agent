@@ -1,0 +1,3 @@
+{"type":"execute","ts":"2026-05-25T13:39:25.562Z","runId":"exec-suite-NE-10968-EC-002","caseId":"NE-10968-EC-002","model":"gpt-5.1","message":"Görev başlatıldı: Sen bir QA otomasyon ajanısın. Sana bir test talimatı verilecek; browser üzerinde adımları uygula.\n\n## Sayfadaki Mevcut ..."}
+{"type":"execute","ts":"2026-05-25T13:39:25.563Z","runId":"exec-suite-NE-10968-EC-002","caseId":"NE-10968-EC-002","model":"gpt-5.1","message":"Görev başlatıldı: Sen bir QA otomasyon ajanısın. Sana bir test talimatı verilecek; browser üzerinde adımları uygula.\n\n## Sayfadaki Mevcut ..."}
+{"type":"error","ts":"2026-05-25T13:39:25.563Z","runId":"exec-suite-NE-10968-EC-002","caseId":"NE-10968-EC-002","error":"Hub is busy with another task"}

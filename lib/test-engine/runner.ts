@@ -10,6 +10,7 @@ import { getUrl, type Platform } from "../config/environments";
 import { v4 as uuidv4 } from "uuid";
 import { createRun, updateRunStatus, saveCaseResults } from "../db/queries";
 import { executeTestCase } from "../mcp-bridge/executor";
+import { ensureBridgeRunning } from "../mcp-bridge/lifecycle";
 import { getTestPlan } from "../tc-planner/planner";
 import { loadCasesByIds } from "./parser";
 
@@ -65,6 +66,16 @@ export interface RunOptions {
 }
 
 export async function startRun(opts: RunOptions): Promise<string> {
+  // Bridge'i lazy başlat — sadece test koşacağımız zaman çalışır
+  try {
+    await ensureBridgeRunning();
+  } catch (err) {
+    throw new Error(
+      `Page Agent bridge başlatılamadı: ${(err as Error).message}. ` +
+        `Manuel başlatmayı deneyin: npm run bridge`
+    );
+  }
+
   const runId = uuidv4();
   const now = new Date().toISOString();
 
