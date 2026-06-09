@@ -54,6 +54,24 @@ export function updateRunStatus(
   `).run(status, passed, failed, finishedAt ?? null, id);
 }
 
+// Server boot sırasında çağrılır. Önceki process'ten kalan "running" satırları
+// (zombi runlar) failed olarak işaretler — runner artık onları takip etmiyor.
+// finished_at olarak started_at kullanılır: gerçek bitiş zamanı bilinmediği
+// için 0 süre göstermek, NOW koyup haftalar-aylar süren run gibi göstermekten
+// daha dürüst.
+export function markStaleRunsAsFailed(): number {
+  const db = getDb();
+  const result = db
+    .prepare(
+      `UPDATE runs
+       SET status = 'failed',
+           finished_at = COALESCE(finished_at, started_at)
+       WHERE status = 'running'`
+    )
+    .run();
+  return result.changes;
+}
+
 function rowToRun(row: Record<string, unknown>): TestRun {
   return {
     id: row.id as string,

@@ -37,6 +37,8 @@ function _broadcast(runId: string, msg: WsMessage): void {
 declare global {
   // eslint-disable-next-line no-var
   var __qa_abort_controllers: Map<string, AbortController> | undefined;
+  // eslint-disable-next-line no-var
+  var __qa_bridge_queue: string[] | undefined;
 }
 
 function getAbortControllers(): Map<string, AbortController> {
@@ -53,6 +55,37 @@ export function abortRun(runId: string): void {
     ctrl.abort();
     controllers.delete(runId);
   }
+}
+
+export function getActiveRunIds(): Set<string> {
+  return new Set(getAbortControllers().keys());
+}
+
+// ─── Bridge execution queue ───────────────────────────────────────────────────
+// Bridge tek-tenant: aynı anda yalnız 1 case işleyebilir. Bu kuyruk runner'ın
+// `executeTestCase` çağrılarını sıraya koyduğu ham sırasını yansıtır.
+// queue[0] = şu anda bridge'in işlediği run.
+// queue[1..] = bridge için bekleyen run'lar (HTTP POST hâlâ await'de).
+
+function getBridgeQueue(): string[] {
+  if (!global.__qa_bridge_queue) {
+    global.__qa_bridge_queue = [];
+  }
+  return global.__qa_bridge_queue;
+}
+
+export function getBridgeQueueSnapshot(): string[] {
+  return [...getBridgeQueue()];
+}
+
+function enqueueBridgeWait(runId: string): void {
+  getBridgeQueue().push(runId);
+}
+
+function dequeueBridgeWait(runId: string): void {
+  const queue = getBridgeQueue();
+  const idx = queue.indexOf(runId);
+  if (idx >= 0) queue.splice(idx, 1);
 }
 
 export interface RunOptions {
@@ -151,24 +184,30 @@ async function runCasesAsync(runId: string, opts: RunOptions, signal: AbortSigna
         },
       });
 
-      const result = await executeTestCase({
-        runId,
-        caseResultId,
-        testCase,
-        environment: opts.environment,
-        platform,
-        signal,
-        onStep: (step) => {
-          if (!signal.aborted) {
-            _broadcast(runId, { type: "step_update", payload: { caseResultId, step } });
-          }
-        },
-        onAnomaly: (anomaly) => {
-          if (!signal.aborted) {
-            _broadcast(runId, { type: "anomaly", payload: { caseResultId, anomaly } });
-          }
-        },
-      });
+      enqueueBridgeWait(runId);
+      let result;
+      try {
+        result = await executeTestCase({
+          runId,
+          caseResultId,
+          testCase,
+          environment: opts.environment,
+          platform,
+          signal,
+          onStep: (step) => {
+            if (!signal.aborted) {
+              _broadcast(runId, { type: "step_update", payload: { caseResultId, step } });
+            }
+          },
+          onAnomaly: (anomaly) => {
+            if (!signal.aborted) {
+              _broadcast(runId, { type: "anomaly", payload: { caseResultId, anomaly } });
+            }
+          },
+        });
+      } finally {
+        dequeueBridgeWait(runId);
+      }
 
       const status = signal.aborted ? "failed" : (result.success ? "success" : "failed");
       result.success && !signal.aborted ? passed++ : failed++;

@@ -4,6 +4,7 @@ import { parse } from "url";
 import next from "next";
 import { WebSocketServer } from "ws";
 import { setupWebSocketServer } from "./ws-handler";
+import { markStaleRunsAsFailed } from "../lib/db/queries";
 
 const dev = process.env.NODE_ENV !== "production";
 const port = parseInt(process.env.PORT || "3000");
@@ -13,6 +14,13 @@ async function main() {
   const handle = app.getRequestHandler();
 
   await app.prepare();
+
+  const staleCleaned = markStaleRunsAsFailed();
+  if (staleCleaned > 0) {
+    console.log(
+      `> ${staleCleaned} eski "running" run failed olarak işaretlendi (önceki process'ten kalan).`
+    );
+  }
 
   const httpServer = createServer((req, res) => {
     const parsedUrl = parse(req.url!, true);
