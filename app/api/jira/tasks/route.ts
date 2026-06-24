@@ -7,6 +7,7 @@ export interface JiraTask {
   status: string;
   priority: string;
   assignee?: string;
+  qaAssignee?: string;
   updated: string;
   url: string;
 }
@@ -19,6 +20,7 @@ interface JiraSearchResponse {
       status: { name: string };
       priority: { name: string };
       assignee?: { displayName: string } | null;
+      customfield_10072?: { displayName?: string } | null;
       updated: string;
     };
   }>;
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const data = await jiraGet<JiraSearchResponse>(
-      `/search/jql?jql=${encodeURIComponent(`project = "${projectKey}" AND status = "${status}" ORDER BY updated DESC`)}&fields=summary,status,priority,assignee,updated&maxResults=50`
+      `/search/jql?jql=${encodeURIComponent(`project = "${projectKey}" AND status = "${status}" ORDER BY updated DESC`)}&fields=summary,status,priority,assignee,updated,customfield_10072&maxResults=50`
     );
 
     const baseUrl = (process.env.JIRA_BASE_URL ?? "").replace(/\/$/, "");
@@ -43,6 +45,7 @@ export async function GET(req: NextRequest) {
       status: issue.fields.status.name,
       priority: issue.fields.priority?.name ?? "Medium",
       assignee: issue.fields.assignee?.displayName ?? undefined,
+      qaAssignee: issue.fields.customfield_10072?.displayName ?? undefined,
       updated: issue.fields.updated,
       url: `${baseUrl}/browse/${issue.key}`,
     }));

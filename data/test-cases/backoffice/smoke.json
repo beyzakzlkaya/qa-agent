@@ -6,7 +6,7 @@
     "tags": ["smoke", "regression"],
     "priority": "critical",
     "domain": "identity",
-    "prompt": "Navigate to the backoffice login page. Enter the admin credentials from the system prompt (username and password). Click the login button. Verify that the dashboard loads successfully and the admin navigation menu is visible.",
+    "prompt": "Navigate to the backoffice login page. Enter {{credentials.backoffice.username}} as the username and {{credentials.backoffice.password}} as the password. Click the login button. Verify that the dashboard loads successfully and the admin navigation menu is visible.",
     "expectedOutcome": "Dashboard page is loaded and admin navigation menu is visible after login"
   },
   {
@@ -16,7 +16,7 @@
     "tags": ["smoke"],
     "priority": "high",
     "domain": "identity",
-    "prompt": "Login to backoffice with admin credentials. Once on the dashboard, find and click the logout button or user menu. Complete the logout process. Verify the page redirects to the login screen.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Once on the dashboard, find and click the logout button or user menu. Complete the logout process. Verify the page redirects to the login screen.",
     "expectedOutcome": "User is redirected to the login page after logout"
   },
   {
@@ -26,7 +26,7 @@
     "tags": ["smoke", "regression"],
     "priority": "high",
     "domain": "general",
-    "prompt": "Login to backoffice with admin credentials. Navigate to the Users or Customers section from the main menu. Verify that the user list is displayed with at least one record.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to the Users or Customers section from the main menu. Verify that the user list is displayed with at least one record.",
     "expectedOutcome": "User list page is visible with a table or grid showing user records"
   },
   {
@@ -36,7 +36,7 @@
     "tags": ["smoke", "regression"],
     "priority": "high",
     "domain": "order",
-    "prompt": "Login to backoffice with admin credentials. Navigate to the Orders section from the main menu. Verify that the orders list is displayed.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to the Orders section from the main menu. Verify that the orders list is displayed.",
     "expectedOutcome": "Orders list is visible with order records in a table"
   },
   {
@@ -46,7 +46,7 @@
     "tags": ["smoke"],
     "priority": "medium",
     "domain": "inventory",
-    "prompt": "Login to backoffice with admin credentials. Navigate to the Products section. Verify that the product catalog is visible.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to the Products section. Verify that the product catalog is visible.",
     "expectedOutcome": "Products list page is visible with at least one product entry"
   },
   {
@@ -56,7 +56,7 @@
     "tags": ["regression"],
     "priority": "medium",
     "domain": "general",
-    "prompt": "Login to backoffice with admin credentials. Find the global search bar or search functionality. Type 'test' in the search box. Verify that search results appear or an appropriate no-results message is shown.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Find the global search bar or search functionality. Type 'test' in the search box. Verify that search results appear or an appropriate no-results message is shown.",
     "expectedOutcome": "Search results page or results dropdown is displayed after typing in search box"
   },
   {
@@ -66,7 +66,7 @@
     "tags": ["regression"],
     "priority": "medium",
     "domain": "general",
-    "prompt": "Login to backoffice with admin credentials. On the dashboard page, verify that statistics widgets or cards are visible (such as total orders, revenue, active users).",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. On the dashboard page, verify that statistics widgets or cards are visible (such as total orders, revenue, active users).",
     "expectedOutcome": "Dashboard shows at least 3 statistics widgets or KPI cards"
   },
   {
@@ -86,7 +86,7 @@
     "tags": ["smoke", "regression"],
     "priority": "critical",
     "domain": "identity",
-    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Verify the page loads with HTTP 200. Verify the left-side decorative image is rendered (non-zero dimensions, no broken src). Verify the 'Giriş' heading is present and visible. Verify the 'Giriş için email ve şifrenizi giriniz' subtitle text is visible within 3s of navigation. Enter ${TEST_ADMIN_EMAIL} into the Email input field. Enter ${TEST_ADMIN_PASSWORD} into the Password field — verify characters are masked (type=\"password\"). Click the show/hide password toggle and verify password characters become visible (type=\"text\"); click again and verify characters are masked again (type=\"password\"). Click the 'Giriş' button. Verify the user is redirected to the backoffice dashboard — the sign-in URL is NOT the final URL and no authentication error banner is displayed.",
+    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Verify the page loads with HTTP 200. Verify the left-side decorative image is rendered (non-zero dimensions, no broken src). Verify the 'Giriş' heading is present and visible. Verify the 'Giriş için email ve şifrenizi giriniz' subtitle text is visible within 3s of navigation. Enter {{credentials.backoffice.username}} into the Email input field. Enter {{credentials.backoffice.password}} into the Password field — verify characters are masked (type=\"password\"). Click the show/hide password toggle and verify password characters become visible (type=\"text\"); click again and verify characters are masked again (type=\"password\"). Click the 'Giriş' button. Verify the user is redirected to the backoffice dashboard — the sign-in URL is NOT the final URL and no authentication error banner is displayed.",
     "expectedOutcome": "Admin is redirected to the backoffice dashboard. Page heading ('Giriş') and subtitle are correct. Left-side image is rendered. Password toggle switches between text and password types correctly. No error banner shown after login.",
     "tcContext": "TC-BO-009: Admin signs in to Backoffice with valid credentials. Priority: critical. Domain: backoffice/authentication. Fixture: FIXTURE-USER-ADMIN-001. Precondition: SHARED-PRE-002. API: POST /identity/auth/token. Steps: Navigate to sign-in, verify all page elements, enter credentials, test password visibility toggle (show then hide), submit and verify dashboard redirect with no error banner."
   },
@@ -108,7 +108,7 @@
     "tags": ["smoke", "regression"],
     "priority": "critical",
     "domain": "buyback",
-    "prompt": "Login to backoffice with admin credentials. Navigate to the buyback or trade-in lead management section. Verify that the buyback lead list is visible with relevant columns (lead ID, status, customer info, device info). Apply a status filter if available. Click on a lead to view details. Verify lead detail page shows complete information.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to the buyback or trade-in lead management section. Verify that the buyback lead list is visible with relevant columns (lead ID, status, customer info, device info). Apply a status filter if available. Click on a lead to view details. Verify lead detail page shows complete information.",
     "expectedOutcome": "Backoffice admin can view and manage buyback leads. Lead list is displayed with filters, and lead detail page loads correctly.",
     "tcContext": "TC-TI-010: Backoffice buyback lead management. Priority: critical. Domain: trade-in/backoffice. Steps: Login, navigate to buyback leads, verify list, filter by status, view lead detail."
   },

@@ -6,7 +6,7 @@
     "tags": ["regression"],
     "priority": "high",
     "domain": "inventory",
-    "prompt": "Login to backoffice with admin credentials. Navigate to Products section. Click 'Add New Product' or similar button. Fill in the product name with 'Test Ürün {{commonData.testName}}', add a description, set a price of 99.99. Save the product. Verify it appears in the product list.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to Products section. Click 'Add New Product' or similar button. Fill in the product name with 'Test Ürün {{commonData.testName}}', add a description, set a price of 99.99. Save the product. Verify it appears in the product list.",
     "expectedOutcome": "New product is created and appears in the product list"
   },
   {
@@ -16,7 +16,7 @@
     "tags": ["regression"],
     "priority": "medium",
     "domain": "general",
-    "prompt": "Login to backoffice with admin credentials. Navigate to Users section. Look for filter or search options. Filter users by status 'Active' if available. Verify the list updates based on the filter.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to Users section. Look for filter or search options. Filter users by status 'Active' if available. Verify the list updates based on the filter.",
     "expectedOutcome": "User list is filtered and shows relevant results"
   },
   {
@@ -26,7 +26,7 @@
     "tags": ["regression"],
     "priority": "high",
     "domain": "order",
-    "prompt": "Login to backoffice with admin credentials. Navigate to Orders section. Click on the first order in the list. Verify that the order detail page shows order information, customer details, and order items.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to Orders section. Click on the first order in the list. Verify that the order detail page shows order information, customer details, and order items.",
     "expectedOutcome": "Order detail page is visible with complete order information"
   },
   {
@@ -36,7 +36,7 @@
     "tags": ["regression"],
     "priority": "low",
     "domain": "general",
-    "prompt": "Login to backoffice with admin credentials. Navigate to Orders section. If pagination controls are visible, click on page 2 or 'Next' button. Verify the list updates to show the next page of results.",
+    "prompt": "Login to backoffice with username {{credentials.backoffice.username}} and password {{credentials.backoffice.password}}. Navigate to Orders section. If pagination controls are visible, click on page 2 or 'Next' button. Verify the list updates to show the next page of results.",
     "expectedOutcome": "Pagination works and navigates to the next page of results"
   },
   {
@@ -46,7 +46,7 @@
     "tags": ["regression"],
     "priority": "critical",
     "domain": "identity",
-    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Verify page loads with HTTP 200. Verify the left-side decorative image is present (non-zero dimensions, src not broken). Verify 'Giriş' heading is visible within 3s. Verify 'Giriş için email ve şifrenizi giriniz' subtitle is visible. Enter ${TEST_ADMIN_EMAIL} in the Email field. Enter ${TEST_ADMIN_PASSWORD} in the Password field — verify type is 'password' and characters are masked. Click show/hide toggle: verify input switches to type='text'. Click toggle again: verify input returns to type='password'. Click 'Giriş'. Verify redirect to dashboard (sign-in URL is NOT the final URL). Verify no error banner is shown. Verify [data-testid='login-page'] is no longer visible.",
+    "prompt": "Navigate to ${BACKOFFICE_URL}/authentication/sign-in/. Verify page loads with HTTP 200. Verify the left-side decorative image is present (non-zero dimensions, src not broken). Verify 'Giriş' heading is visible within 3s. Verify 'Giriş için email ve şifrenizi giriniz' subtitle is visible. Enter {{credentials.backoffice.username}} in the Email field. Enter {{credentials.backoffice.password}} in the Password field — verify type is 'password' and characters are masked. Click show/hide toggle: verify input switches to type='text'. Click toggle again: verify input returns to type='password'. Click 'Giriş'. Verify redirect to dashboard (sign-in URL is NOT the final URL). Verify no error banner is shown. Verify [data-testid='login-page'] is no longer visible.",
     "expectedOutcome": "Admin is redirected to dashboard. Page elements (Giriş heading, subtitle, decorative image) are all correctly rendered. Password toggle works in both directions. No error banner post-login. Sign-in page is no longer shown.",
     "tcContext": "TC-BO-009: Admin signs in to Backoffice with valid credentials. Full regression check including UI element verification, left-side image render, password toggle both directions, and post-login assertions. Fixture: FIXTURE-USER-ADMIN-001. Precondition: SHARED-PRE-002. API: POST /identity/auth/token."
   },

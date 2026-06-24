@@ -74,6 +74,7 @@ export default function JiraListPage() {
   const [activeFilter, setActiveFilter] = useState<TaskFilterId>("all");
   const [sortId, setSortId] = useState<TaskSortId>("sla");
   const [deferred, setDeferred] = useState<string[]>([]);
+  const [selectedQa, setSelectedQa] = useState<string | null>(null);
 
   // Enrichment cache (key → enrichment) — kart bileşeni kendi fetch'ini yapıyor
   // ama sıralama/filtreleme için merkezi bir cache lazım. Her kart enrichment'i
@@ -82,8 +83,13 @@ export default function JiraListPage() {
   // /api/jira/task-enrichment endpoint'ini ayrı çağırıp toplu cache tutuyoruz.
   const [enrichmentMap, setEnrichmentMap] = useState<Record<string, JiraTaskEnrichment>>({});
 
-  const qaUser =
-    typeof process !== "undefined" ? process.env.NEXT_PUBLIC_QA_USER : undefined;
+  const qaUsers = useMemo(() => {
+    const set = new Set<string>();
+    for (const t of tasks) {
+      if (t.qaAssignee) set.add(t.qaAssignee);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "tr"));
+  }, [tasks]);
 
   // ─ Initial load
   useEffect(() => {
@@ -168,7 +174,6 @@ export default function JiraListPage() {
   const { filtered, counts } = useMemo(() => {
     const counts: Partial<Record<TaskFilterId, number>> = {
       all: tasks.length,
-      mine: 0,
       highPriority: 0,
       reopen: 0,
       stuck: 0,
@@ -176,7 +181,6 @@ export default function JiraListPage() {
     };
 
     for (const t of tasks) {
-      if (qaUser && t.assignee === qaUser) counts.mine = (counts.mine ?? 0) + 1;
       if (priorityWeight(t.priority) >= 4) counts.highPriority = (counts.highPriority ?? 0) + 1;
       const e = enrichmentMap[t.key];
       if (e && e.reopenCount > 0) counts.reopen = (counts.reopen ?? 0) + 1;
@@ -185,11 +189,12 @@ export default function JiraListPage() {
 
     let filtered = [...tasks];
 
+    if (selectedQa) {
+      filtered = filtered.filter((t) => t.qaAssignee === selectedQa);
+    }
+
     // Filter
     switch (activeFilter) {
-      case "mine":
-        if (qaUser) filtered = filtered.filter((t) => t.assignee === qaUser);
-        break;
       case "highPriority":
         filtered = filtered.filter((t) => priorityWeight(t.priority) >= 4);
         break;
@@ -251,7 +256,7 @@ export default function JiraListPage() {
     }
 
     return { filtered, counts };
-  }, [tasks, activeFilter, sortId, deferred, enrichmentMap, qaUser]);
+  }, [tasks, activeFilter, sortId, deferred, enrichmentMap, selectedQa]);
 
   // ─ Render
   return (
@@ -318,6 +323,9 @@ export default function JiraListPage() {
             sortId={sortId}
             onSortChange={setSortId}
             hasDeferredItems={deferred.length > 0}
+            qaUsers={qaUsers}
+            selectedQa={selectedQa}
+            onQaChange={setSelectedQa}
           />
         )}
 
@@ -378,7 +386,7 @@ export default function JiraListPage() {
                 task={task}
                 onSelect={() => handleSelect(task.key)}
                 onDefer={handleDefer}
-                highlightAssignee={qaUser}
+                highlightAssignee={selectedQa ?? undefined}
               />
             ))}
           </div>

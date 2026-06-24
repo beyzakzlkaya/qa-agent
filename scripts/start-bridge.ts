@@ -141,6 +141,16 @@ let stepCounter = 0;
 // Track current run context for logging
 let currentRunId = "unknown";
 let currentCaseId = "unknown";
+// Extension'a config göndermek, useAgent.ts içindeki React useEffect[config]'i tetikler
+// ve agent.dispose() race condition'ı yüzünden ilk execute hep "Task aborted" döner.
+// Çözüm: her config değişikliğinde bir defaya mahsus "priming" execute yollanır
+// (chrome.storage.local'a config'i yazdırır), sonra gerçek execute config'siz gider.
+// Bkz: alibaba/page-agent packages/extension/src/agent/useAgent.ts:70-108
+let primedConfigSignature: string | null = null;
+let warmupResolver: (() => void) | null = null;
+// Priming sonrası gelen geç result'lar gerçek execute'a karışmasın diye sayaç.
+// Priming send → +1, result/error swallow → -1, safety timeout → resetlenmez (geç gelen yine yutulur).
+let pendingPrimerResponses = 0;
 
 function hubConnected(): boolean {
   return hubWs?.readyState === WebSocket.OPEN;
@@ -1060,22 +1070,36 @@ const server = http.createServer((req, res) => {
         runId: runId,
       };
 
-      // Navigate to startUrl first so the agent starts on the correct page,
-      // not on whatever tab the extension currently has focused (e.g. localhost:3000).
-      if (startUrl) {
-        console.log(`[bridge] 🌐 Önce hedef URL'e yönlendiriliyor: ${startUrl}`);
-        hubWs!.send(JSON.stringify({ type: "navigate", url: startUrl }));
-        console.log(`[bridge]   Sayfa yüklenmesi için 6s bekleniyor...`);
-        // Give the page extra time to load fully (JS frameworks, cookie banners, etc.)
-        await new Promise((r) => setTimeout(r, 6000));
-        console.log(`[bridge]   Bekleme tamamlandı ✓`);
-      }
+      // Config priming: extension'ın useAgent[config] useEffect'i her execute config'i için
+      // agent.dispose() çağırıp race condition'a sebep oluyor. İlk execute'ta config gönderip
+      // chrome.storage.local'a yazdırıyoruz; sonraki gerçek execute config'siz gidiyor.
+      const currentSignature = JSON.stringify({
+        baseURL: patchedConfig.baseURL,
+        model: patchedConfig.model,
+        apiKey: typeof patchedConfig.apiKey === "string" ? patchedConfig.apiKey.slice(-8) : "",
+      });
 
-      const msg: Record<string, unknown> = { type: "execute", task, config: patchedConfig };
-      if (startUrl) {
-        msg.startUrl = startUrl;
-        msg.navigateTo = startUrl;
-        msg.url = startUrl;
+      if (primedConfigSignature !== currentSignature) {
+        console.log(`[bridge] 🔧 Config priming — extension chrome.storage'ına yazılıyor (model=${patchedConfig.model})`);
+        const primingMsg = { type: "execute", task: "ping", config: patchedConfig };
+        pendingPrimerResponses++;
+        hubWs!.send(JSON.stringify(primingMsg));
+        // Priming execute race ile "Task aborted" döndürür; sonucu sessizce yutup devam et.
+        await new Promise<void>((resolve) => {
+          let timer: ReturnType<typeof setTimeout>;
+          warmupResolver = () => { clearTimeout(timer); resolve(); };
+          timer = setTimeout(() => {
+            if (warmupResolver) {
+              console.warn(`[bridge] ⚠ Priming timeout (5s) — devam ediliyor`);
+              warmupResolver = null;
+              resolve();
+            }
+          }, 5000);
+        });
+        // React useEffect cleanup'ın tamamlanması için ek bekleme
+        await new Promise((r) => setTimeout(r, 600));
+        primedConfigSignature = currentSignature;
+        console.log(`[bridge] ✓ Config primed`);
       }
 
       writeBridgeLog({
@@ -1087,7 +1111,10 @@ const server = http.createServer((req, res) => {
         message: `Görev başlatıldı: ${task.slice(0, 120)}...`,
       });
 
-      console.log(`[bridge] 📨 Extension'a "execute" mesajı gönderiliyor...`);
+      // Gerçek execute — config field'ı YOK (useEffect re-render tetiklemez)
+      const msg: Record<string, unknown> = { type: "execute", task };
+
+      console.log(`[bridge] 📨 Extension'a "execute" mesajı gönderiliyor (config-less)...`);
       hubWs!.send(JSON.stringify(msg));
       console.log(`[bridge] ✅ Mesaj gönderildi — AI adım akışı bekleniyor...`);
       })();
@@ -1194,6 +1221,19 @@ wss.on("connection", (ws) => {
   ws.on("message", (rawData: Buffer) => {
     let msg: { type: string; success?: boolean; data?: string; message?: string; step?: unknown };
     try { msg = JSON.parse(rawData.toString("utf-8")); } catch { return; }
+
+    // Priming warmup: ilk config'li execute'un sonucunu sessizce yut.
+    // Safety timeout sonrası gelen geç response'lar da yutulmalı (pendingPrimerResponses sayacı).
+    if ((msg.type === "result" || msg.type === "error") && pendingPrimerResponses > 0) {
+      pendingPrimerResponses--;
+      console.log(`[bridge] 🔧 Priming sonucu yutuldu (${msg.type}) — gerçek execute hazırlanıyor`);
+      if (warmupResolver) {
+        const resolve = warmupResolver;
+        warmupResolver = null;
+        resolve();
+      }
+      return;
+    }
 
     if (msg.type === "result") {
       const success = msg.success ?? false;
@@ -1302,6 +1342,10 @@ wss.on("connection", (ws) => {
   ws.on("close", () => {
     console.log(`\n[bridge] ⚠ Extension hub bağlantısı kesildi | aktif görev=${pendingTask !== null}`);
     if (hubWs === ws) hubWs = null;
+    // Extension reconnect olduğunda agentRef yeni baştan kurulacak → priming tekrar gerekli
+    primedConfigSignature = null;
+    pendingPrimerResponses = 0;
+    if (warmupResolver) { warmupResolver(); warmupResolver = null; }
     writeBridgeLog({
       type: "connection",
       ts: new Date().toISOString(),

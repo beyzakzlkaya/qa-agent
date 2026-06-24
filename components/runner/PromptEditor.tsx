@@ -210,7 +210,10 @@ export function PromptEditor() {
   };
 
   const execute = async (save: boolean) => {
-    if (!prompt.trim() || !title.trim()) return;
+    if (!prompt.trim()) return;
+    // Title boşsa prompt'un ilk satırını al, 60 karakterle sınırla
+    const effectiveTitle = title.trim() || prompt.trim().split("\n")[0].slice(0, 60);
+    if (!title.trim()) setTitle(effectiveTitle);
     setLoading(save ? "save" : "run");
 
     try {
@@ -219,7 +222,7 @@ export function PromptEditor() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            title,
+            title: effectiveTitle,
             prompt,
             platform: selectedPlatforms[0] ?? "backoffice",
             tags: selectedTags,
@@ -231,11 +234,11 @@ export function PromptEditor() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: title,
+          name: effectiveTitle,
           environment: env,
           runType: "custom",
           customPrompt: {
-            title,
+            title: effectiveTitle,
             prompt,
             platform: selectedPlatforms,
             expectedOutcome: expectedOutcome || "Test başarıyla tamamlanmalı",
@@ -255,7 +258,7 @@ export function PromptEditor() {
     <div className="space-y-4">
       <div>
         <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-          Test Adı *
+          Test Adı <span className="text-muted-foreground/60">(boş bırakırsan prompt'un ilk satırı kullanılır)</span>
         </label>
         <input
           value={title}
@@ -377,7 +380,7 @@ export function PromptEditor() {
       <div className="flex gap-2 pt-2">
         <button
           onClick={() => execute(false)}
-          disabled={!prompt.trim() || !title.trim() || !!loading}
+          disabled={!prompt.trim() || !!loading}
           className="flex-1 flex items-center justify-center gap-2 py-2 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors font-medium"
         >
           {loading === "run" ? (
@@ -400,7 +403,7 @@ export function PromptEditor() {
 
         <button
           onClick={() => execute(true)}
-          disabled={!prompt.trim() || !title.trim() || !!loading}
+          disabled={!prompt.trim() || !!loading}
           className="flex items-center justify-center gap-2 px-4 py-2 text-sm rounded-md border border-border hover:bg-accent text-foreground disabled:opacity-50 transition-colors font-medium"
         >
           {loading === "save" ? (

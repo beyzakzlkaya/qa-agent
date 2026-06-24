@@ -13,6 +13,20 @@ import { executeTestCase } from "../mcp-bridge/executor";
 import { ensureBridgeRunning } from "../mcp-bridge/lifecycle";
 import { getTestPlan } from "../tc-planner/planner";
 import { loadCasesByIds } from "./parser";
+import { postRunSummaryToSlack } from "../notifications/slack";
+
+function notifySlackIfConfigured(runId: string): void {
+  if (!process.env.SLACK_WEBHOOK_URL) return;
+  postRunSummaryToSlack(runId)
+    .then((result) => {
+      if (!result.ok && !result.skipped) {
+        console.warn(`[runner] Slack bildirimi başarısız (${runId}): ${result.reason}`);
+      }
+    })
+    .catch((err) => {
+      console.warn(`[runner] Slack bildirimi hatası (${runId}):`, (err as Error).message);
+    });
+}
 
 export type BroadcastFn = (runId: string, msg: WsMessage) => void;
 
@@ -252,6 +266,7 @@ async function runCasesAsync(runId: string, opts: RunOptions, signal: AbortSigna
         updateRunStatus(runId, "failed", passed, failed, new Date().toISOString());
         getAbortControllers().delete(runId);
         _broadcast(runId, { type: "run_end", payload: { runId, status: "failed", passed, failed } });
+        notifySlackIfConfigured(runId);
         return;
       }
     }
@@ -273,6 +288,8 @@ async function runCasesAsync(runId: string, opts: RunOptions, signal: AbortSigna
     type: "run_end",
     payload: { runId, status: finalStatus, passed, failed },
   });
+
+  notifySlackIfConfigured(runId);
 }
 
 // ─── Plan-based run ───────────────────────────────────────────────────────────

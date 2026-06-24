@@ -309,6 +309,15 @@ export function getScreenshots(testCaseId: string): ScreenshotRow[] {
     .all(testCaseId) as ScreenshotRow[];
 }
 
+export function getScreenshotsByRun(runId: string): ScreenshotRow[] {
+  const db = getDb();
+  return db
+    .prepare(
+      "SELECT * FROM screenshots WHERE run_id = ? ORDER BY taken_at ASC"
+    )
+    .all(runId) as ScreenshotRow[];
+}
+
 // ─── JIRA risk summary cache ──────────────────────────────────────────────────
 
 export interface JiraRiskSummaryRow {

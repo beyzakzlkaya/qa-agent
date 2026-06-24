@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "lucide-react";
 
-export type TaskFilterId = "all" | "mine" | "highPriority" | "reopen" | "stuck" | "deferred";
+export type TaskFilterId = "all" | "highPriority" | "reopen" | "stuck" | "deferred";
 export type TaskSortId = "sla" | "newest" | "priority" | "complexity";
 
 interface FilterOption {
@@ -19,11 +19,13 @@ interface Props {
   sortId: TaskSortId;
   onSortChange: (id: TaskSortId) => void;
   hasDeferredItems: boolean;
+  qaUsers: string[];
+  selectedQa: string | null;
+  onQaChange: (qa: string | null) => void;
 }
 
 const FILTER_OPTIONS: FilterOption[] = [
   { id: "all", label: "Tümü" },
-  { id: "mine", label: "Bana atanan" },
   { id: "highPriority", label: "Yüksek öncelik" },
   { id: "reopen", label: "Reopen" },
   { id: "stuck", label: "SLA riski" },
@@ -43,10 +45,39 @@ export function TaskFilterBar({
   sortId,
   onSortChange,
   hasDeferredItems,
+  qaUsers,
+  selectedQa,
+  onQaChange,
 }: Props) {
   return (
     <div className="flex items-center gap-2 flex-wrap mb-4">
       <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="relative">
+          <select
+            value={selectedQa ?? ""}
+            onChange={(e) => onQaChange(e.target.value === "" ? null : e.target.value)}
+            className={cn(
+              "appearance-none pl-2.5 pr-7 py-1 rounded-full border text-[11px] font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring transition-all",
+              selectedQa
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-card text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+            )}
+            title={selectedQa ? `${selectedQa} üzerindeki işler` : "QA seç"}
+          >
+            <option value="">QA: Tümü</option>
+            {qaUsers.map((u) => (
+              <option key={u} value={u}>
+                {u}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            className={cn(
+              "w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none",
+              selectedQa ? "text-primary-foreground" : "text-muted-foreground"
+            )}
+          />
+        </div>
         {FILTER_OPTIONS.map((opt) => {
           const count = filterCounts[opt.id];
           const active = activeFilter === opt.id;

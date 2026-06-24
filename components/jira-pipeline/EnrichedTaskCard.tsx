@@ -124,7 +124,7 @@ interface Props {
   task: JiraTask;
   onSelect: () => void;
   onDefer: (key: string) => void;
-  /** Filtrede "Bana atanan" için karşılaştırma — eşleşirse görsel vurgu */
+  /** Seçili QA Engineer — task.qaAssignee eşleşirse görsel vurgu */
   highlightAssignee?: string;
 }
 
@@ -184,7 +184,7 @@ export function EnrichedTaskCard({ task, onSelect, onDefer, highlightAssignee }:
   }, [visible, enrichment, loading, loadEnrichment]);
 
   const hasStuck = !!enrichment?.stuckReason;
-  const isMine = highlightAssignee && task.assignee === highlightAssignee;
+  const isMine = highlightAssignee && task.qaAssignee === highlightAssignee;
 
   return (
     <div
@@ -217,12 +217,27 @@ export function EnrichedTaskCard({ task, onSelect, onDefer, highlightAssignee }:
                 Takılı
               </span>
             )}
-            {task.assignee && (
-              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground ml-auto">
-                <User className="w-3 h-3" />
-                {task.assignee}
-              </span>
-            )}
+            <div className="inline-flex items-center gap-2 ml-auto">
+              {task.qaAssignee && (
+                <span
+                  className={cn(
+                    "inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border font-medium",
+                    isMine
+                      ? "bg-primary/10 text-primary border-primary/30"
+                      : "bg-muted/40 text-muted-foreground border-border"
+                  )}
+                  title="QA Engineer"
+                >
+                  QA: {task.qaAssignee}
+                </span>
+              )}
+              {task.assignee && (
+                <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <User className="w-3 h-3" />
+                  {task.assignee}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Title */}

@@ -73,3 +73,5 @@
 {"type":"error","ts":"2026-05-25T15:45:17.755Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
 {"type":"error","ts":"2026-05-25T15:45:17.760Z","runId":"unknown","caseId":"unknown","error":"Hub is busy with another task"}
 {"type":"execute","ts":"2026-05-25T15:45:31.781Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Verdiğiniz adımları uygulamak için Backoffice Ceza Havuzu ekranına erişmem gerekiyor, ancak mevcut ortamda açtığım backoffice sekmesi `undefined` URL/"}
+{"type":"execute","ts":"2026-06-24T14:23:48.310Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Task aborted"}
+{"type":"execute","ts":"2026-06-24T14:42:34.272Z","runId":"unknown","caseId":"unknown","message":"Görev sonucu: success=false — Task aborted"}
