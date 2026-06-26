@@ -714,3 +714,8 @@
 {"type":"connection","ts":"2026-06-24T14:58:44.336Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
 {"type":"connection","ts":"2026-06-24T15:00:16.910Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
 {"type":"connection","ts":"2026-06-24T15:09:15.096Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-06-25T06:58:37.230Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-06-25T07:02:43.902Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-06-25T11:09:11.194Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}
+{"type":"connection","ts":"2026-06-25T11:09:54.315Z","runId":"bridge","message":"Chrome Extension hub bağlantısı kesildi"}
+{"type":"connection","ts":"2026-06-25T13:38:28.044Z","runId":"bridge","message":"Chrome Extension hub bağlandı"}

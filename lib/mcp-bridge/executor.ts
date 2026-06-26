@@ -93,14 +93,57 @@ function bridgeEventToTestStep(
     goal = event.reflection.next_goal.slice(0, 300);
   }
 
-  if (event.action?.name) {
-    const name = event.action.name;
+  // Defensive unwrap: older bridge builds emit events where action.name is the
+  // raw page-agent tool name "AgentOutput" and the real sub-action / reflection
+  // live nested inside action.input. Pull them out so the UI shows the actual
+  // step (e.g. "🌐 go to url") instead of "▶ AgentOutput".
+  let eventAction = event.action;
+  if (eventAction?.name === "AgentOutput" && eventAction.input && typeof eventAction.input === "object") {
+    const inp = eventAction.input as Record<string, unknown>;
+
+    if (!goal) {
+      const cs = (inp.current_state && typeof inp.current_state === "object")
+        ? (inp.current_state as Record<string, unknown>)
+        : {};
+      const nextGoal = inp.next_goal ?? cs.next_goal;
+      const thinking = inp.thinking ?? cs.thinking;
+      if (typeof nextGoal === "string" && nextGoal) {
+        goal = nextGoal.slice(0, 300);
+      } else if (typeof thinking === "string" && thinking) {
+        goal = thinking.slice(0, 300);
+      }
+    }
+
+    let inner: Record<string, unknown> | undefined;
+    if (Array.isArray(inp.action)) {
+      inner = (inp.action as Record<string, unknown>[])[0];
+    } else if (inp.action && typeof inp.action === "object") {
+      inner = inp.action as Record<string, unknown>;
+    }
+    if (inner) {
+      if (typeof inner.name === "string") {
+        eventAction = { name: inner.name, input: inner.input as Record<string, unknown> | undefined, output: eventAction.output };
+      } else {
+        const innerName = Object.keys(inner).find((k) => k !== "name" && k !== "input");
+        if (innerName) {
+          eventAction = { name: innerName, input: inner[innerName] as Record<string, unknown> | undefined, output: eventAction.output };
+        } else {
+          eventAction = undefined;
+        }
+      }
+    } else {
+      eventAction = undefined;
+    }
+  }
+
+  if (eventAction?.name) {
+    const name = eventAction.name;
     const icon = ACTION_ICONS[name] ?? "▶";
     const label = name.replace(/_/g, " ");
     let detail = "";
 
-    if (event.action.input && typeof event.action.input === "object") {
-      const inp = event.action.input as Record<string, unknown>;
+    if (eventAction.input && typeof eventAction.input === "object") {
+      const inp = eventAction.input as Record<string, unknown>;
       const val =
         inp.url ??
         inp.selector ??
@@ -113,8 +156,8 @@ function bridgeEventToTestStep(
     }
 
     // For done() actions capture the output message
-    if (name === "done" && event.action.output) {
-      detail = ` → ${String(event.action.output).slice(0, 150)}`;
+    if (name === "done" && eventAction.output) {
+      detail = ` → ${String(eventAction.output).slice(0, 150)}`;
     }
 
     actionPart = `${icon} ${label}${detail}`;
@@ -129,8 +172,8 @@ function bridgeEventToTestStep(
     description = actionPart;
   } else if (event.reflection?.evaluation_previous_goal) {
     description = event.reflection.evaluation_previous_goal.slice(0, 250);
-  } else if (event.action) {
-    description = `▶ ${JSON.stringify(event.action).slice(0, 200)}`;
+  } else if (eventAction) {
+    description = `▶ ${JSON.stringify(eventAction).slice(0, 200)}`;
   } else if (event.reflection) {
     description = JSON.stringify(event.reflection).slice(0, 200);
   }
@@ -140,8 +183,8 @@ function bridgeEventToTestStep(
   }
 
   // Infer step status from action name / output
-  const actionOutput = String(event.action?.output ?? "").toLowerCase();
-  const actionName = event.action?.name ?? "";
+  const actionOutput = String(eventAction?.output ?? "").toLowerCase();
+  const actionName = eventAction?.name ?? "";
 
   const isDoneFailure =
     actionName === "done" &&

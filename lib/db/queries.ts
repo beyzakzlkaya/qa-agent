@@ -467,6 +467,96 @@ export function getDailyTrend(days = 14): DailyTrendRow[] {
   `).all() as DailyTrendRow[];
 }
 
+export interface RunsSummary {
+  totalRuns: number;
+  passedRuns: number;
+  failedRuns: number;
+  partialRuns: number;
+  runningRuns: number;
+  totalCases: number;
+  passedCases: number;
+  failedCases: number;
+  caseSuccessRate: number;
+  runSuccessRate: number;
+}
+
+/**
+ * Aggregates across **all** runs in the DB — not a recent window.
+ * Case-level success rate is the source of truth: it weights large test
+ * suites correctly and treats `partial` runs fairly (their passed cases
+ * still count). The run-level rate is kept for the legacy KPI display.
+ */
+export function getRunsSummary(): RunsSummary {
+  const db = getDb();
+  const row = db
+    .prepare(
+      `SELECT
+        COUNT(*) as totalRuns,
+        SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) as passedRuns,
+        SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failedRuns,
+        SUM(CASE WHEN status = 'partial' THEN 1 ELSE 0 END) as partialRuns,
+        SUM(CASE WHEN status = 'running' THEN 1 ELSE 0 END) as runningRuns,
+        COALESCE(SUM(total_cases), 0) as totalCases,
+        COALESCE(SUM(passed_cases), 0) as passedCases,
+        COALESCE(SUM(failed_cases), 0) as failedCases
+       FROM runs`
+    )
+    .get() as Record<string, number>;
+
+  const totalRuns = row.totalRuns ?? 0;
+  const finishedRuns = (row.passedRuns ?? 0) + (row.failedRuns ?? 0) + (row.partialRuns ?? 0);
+  const totalCases = row.totalCases ?? 0;
+  const passedCases = row.passedCases ?? 0;
+
+  return {
+    totalRuns,
+    passedRuns: row.passedRuns ?? 0,
+    failedRuns: row.failedRuns ?? 0,
+    partialRuns: row.partialRuns ?? 0,
+    runningRuns: row.runningRuns ?? 0,
+    totalCases,
+    passedCases,
+    failedCases: row.failedCases ?? 0,
+    caseSuccessRate: totalCases > 0 ? Math.round((passedCases / totalCases) * 1000) / 10 : 0,
+    runSuccessRate:
+      finishedRuns > 0 ? Math.round(((row.passedRuns ?? 0) / finishedRuns) * 1000) / 10 : 0,
+  };
+}
+
+/**
+ * For each test (grouped by normalized run name) returns the most recent
+ * `window` outcomes so the caller can detect flakiness server-side.
+ */
+export interface RecentRunOutcome {
+  name: string;
+  status: RunStatus;
+  passedCases: number;
+  failedCases: number;
+  totalCases: number;
+  startedAt: string;
+}
+
+export function getRecentRunOutcomes(perTestLimit = 10): RecentRunOutcome[] {
+  const db = getDb();
+  const rows = db
+    .prepare(
+      `SELECT name, status, passed_cases, failed_cases, total_cases, started_at
+       FROM runs
+       WHERE status IN ('success', 'failed', 'partial')
+       ORDER BY started_at DESC
+       LIMIT ?`
+    )
+    .all(perTestLimit * 200) as Record<string, unknown>[];
+  return rows.map((r) => ({
+    name: r.name as string,
+    status: r.status as RunStatus,
+    passedCases: r.passed_cases as number,
+    failedCases: r.failed_cases as number,
+    totalCases: r.total_cases as number,
+    startedAt: r.started_at as string,
+  }));
+}
+
 export function getTestCaseHealth(): TestCaseHealthRow[] {
   const db = getDb();
   return db.prepare(`

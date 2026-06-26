@@ -7,6 +7,7 @@ import { LiveStatusStrip } from "@/components/dashboard2/LiveStatusStrip";
 import { AttentionPanel } from "@/components/dashboard2/AttentionPanel";
 import { QualityHealthKpis } from "@/components/dashboard2/QualityHealthKpis";
 import { ModuleHeatmap } from "@/components/dashboard2/ModuleHeatmap";
+import { CriticalHealthCard } from "@/components/dashboard2/CriticalHealthCard";
 import { ErrorTypeDistribution } from "@/components/dashboard2/ErrorTypeDistribution";
 import { EnhancedPassRateTrend } from "@/components/dashboard2/EnhancedPassRateTrend";
 import { DurationTrendCard } from "@/components/dashboard2/DurationTrendCard";
@@ -45,7 +46,7 @@ function dbRunToDashboardRun(r: TestRun, durationMs?: number): Run {
   const statusMap: Record<string, Run["status"]> = {
     success: "passed",
     failed: "failed",
-    partial: "failed",
+    partial: "partial",
     running: "running",
   };
 
@@ -90,9 +91,9 @@ export default function DashboardPage() {
   const fetchRuns = async () => {
     try {
       setError(null);
-      const res = await fetch("/api/runs?limit=100");
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = (await res.json()) as RunsApiResponse;
+      const runsRes = await fetch("/api/runs?limit=500");
+      if (!runsRes.ok) throw new Error(`HTTP ${runsRes.status}`);
+      const data = (await runsRes.json()) as RunsApiResponse;
       const adapted = (data.runs ?? []).map((r) => dbRunToDashboardRun(r, r.durationMs));
       setRuns(adapted);
     } catch (err) {
@@ -199,9 +200,12 @@ export default function DashboardPage() {
 
               {/* Section 4: Modül heatmap + Hata türü dağılımı */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <ModuleHeatmap runs={runs} />
+                <ModuleHeatmap />
                 <ErrorTypeDistribution />
               </div>
+
+              {/* Section 4b: İş etkili test sağlığı (priority bazlı) */}
+              <CriticalHealthCard />
 
               {/* Section 5: Trend grafiği + Süre trendi */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -1,4 +1,4 @@
-export type RunStatus = "failed" | "running" | "passed";
+export type RunStatus = "failed" | "running" | "passed" | "partial";
 
 export interface Run {
   id: string;

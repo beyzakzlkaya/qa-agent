@@ -202,6 +202,72 @@ function broadcastStep(step: unknown) {
   });
 }
 
+// Page-agent's AgentOutput tool ships reflection (evaluation_previous_goal /
+// memory / next_goal / thinking) plus an `action` field. Across page-agent
+// versions the shape drifts: action may be an array (`[{open_tab:{...}}]`) or a
+// single keyed object (`{open_tab:{...}}`), and reflection fields may live at
+// the top level or under a `current_state` wrapper. unwrapAgentOutput
+// normalises all of these into ({reflection, action}) so SSE consumers always
+// see a meaningful step description instead of a bare "AgentOutput" label.
+function unwrapAgentOutput(
+  args: Record<string, unknown>,
+  outputLabel: string
+): { reflection?: Record<string, string>; action?: Record<string, unknown> } {
+  const cs = (args.current_state && typeof args.current_state === "object")
+    ? (args.current_state as Record<string, unknown>)
+    : {};
+
+  const evalPrev = args.evaluation_previous_goal ?? cs.evaluation_previous_goal;
+  const memory = args.memory ?? cs.memory;
+  const nextGoal = args.next_goal ?? cs.next_goal;
+  const thinking = args.thinking ?? cs.thinking;
+
+  const hasReflection =
+    evalPrev !== undefined ||
+    memory !== undefined ||
+    nextGoal !== undefined ||
+    thinking !== undefined;
+
+  let reflection: Record<string, string> | undefined;
+  if (hasReflection) {
+    reflection = {
+      evaluation_previous_goal: String(evalPrev ?? ""),
+      memory: String(memory ?? ""),
+      next_goal: String(nextGoal ?? (thinking ? String(thinking).slice(0, 300) : "")),
+    };
+  }
+
+  // action shape: array of {tool:input}, single {tool:input}, or {name, input}
+  let actionObj: Record<string, unknown> | undefined;
+  if (Array.isArray(args.action)) {
+    actionObj = (args.action as Record<string, unknown>[])[0];
+  } else if (args.action && typeof args.action === "object") {
+    actionObj = args.action as Record<string, unknown>;
+  }
+
+  let action: Record<string, unknown> | undefined;
+  if (actionObj) {
+    if (typeof actionObj.name === "string") {
+      action = {
+        name: actionObj.name,
+        input: (actionObj.input as Record<string, unknown>) ?? {},
+        output: outputLabel,
+      };
+    } else {
+      const actionName = Object.keys(actionObj).find((k) => k !== "name" && k !== "input");
+      if (actionName) {
+        action = {
+          name: actionName,
+          input: (actionObj[actionName] as Record<string, unknown>) ?? {},
+          output: outputLabel,
+        };
+      }
+    }
+  }
+
+  return { reflection, action };
+}
+
 function extractStep(responseJson: Record<string, unknown>, stepIndex: number) {
   try {
     // ── OpenAI format: { choices: [{ message: { tool_calls, content }, finish_reason }] }
@@ -220,21 +286,22 @@ function extractStep(responseJson: Record<string, unknown>, stepIndex: number) {
         let args: Record<string, unknown> = {};
         try { args = JSON.parse(String((toolCall.function as Record<string, string>)?.arguments ?? "{}")); } catch { /**/ }
 
-        if ("next_goal" in args || "evaluation_previous_goal" in args) {
-          reflection = {
-            evaluation_previous_goal: String(args.evaluation_previous_goal ?? ""),
-            memory: String(args.memory ?? ""),
-            next_goal: String(args.next_goal ?? ""),
-          };
-          const actionArr = Array.isArray(args.action) ? args.action as Record<string, unknown>[] : [];
-          const actionObj = actionArr[0] ?? {};
-          const actionName = Object.keys(actionObj)[0];
-          if (actionName) {
-            action = { name: actionName, input: actionObj[actionName] ?? {}, output: String(choice.finish_reason ?? "") };
-          }
+        const toolName = (toolCall.function as Record<string, string>)?.name ?? "unknown";
+        const isAgentOutput =
+          toolName === "AgentOutput" ||
+          "next_goal" in args ||
+          "evaluation_previous_goal" in args ||
+          "current_state" in args ||
+          "thinking" in args ||
+          "action" in args;
+
+        if (isAgentOutput) {
+          const unwrapped = unwrapAgentOutput(args, String(choice.finish_reason ?? ""));
+          reflection = unwrapped.reflection;
+          action = unwrapped.action;
         } else {
           action = {
-            name: (toolCall.function as Record<string, string>)?.name ?? "unknown",
+            name: toolName,
             input: args,
             output: String(choice.finish_reason ?? ""),
           };
@@ -287,18 +354,18 @@ function extractStep(responseJson: Record<string, unknown>, stepIndex: number) {
           const toolName = String(block.name ?? "unknown");
           const toolInput = (block.input ?? {}) as Record<string, unknown>;
 
-          if ("next_goal" in toolInput || "evaluation_previous_goal" in toolInput) {
-            reflection = {
-              evaluation_previous_goal: String(toolInput.evaluation_previous_goal ?? ""),
-              memory: String(toolInput.memory ?? ""),
-              next_goal: String(toolInput.next_goal ?? ""),
-            };
-            const actionArr = Array.isArray(toolInput.action) ? toolInput.action as Record<string, unknown>[] : [];
-            const actionObj = actionArr[0] ?? {};
-            const actionName = Object.keys(actionObj)[0];
-            if (actionName) {
-              action = { name: actionName, input: actionObj[actionName] ?? {}, output: "tool_use" };
-            }
+          const isAgentOutput =
+            toolName === "AgentOutput" ||
+            "next_goal" in toolInput ||
+            "evaluation_previous_goal" in toolInput ||
+            "current_state" in toolInput ||
+            "thinking" in toolInput ||
+            "action" in toolInput;
+
+          if (isAgentOutput) {
+            const unwrapped = unwrapAgentOutput(toolInput, "tool_use");
+            reflection = unwrapped.reflection;
+            action = unwrapped.action;
           } else {
             action = { name: toolName, input: toolInput, output: "tool_use" };
           }
