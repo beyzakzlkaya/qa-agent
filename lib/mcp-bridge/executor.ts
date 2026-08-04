@@ -337,6 +337,8 @@ export interface ExecutionContext {
   signal?: AbortSignal;
   onStep: (step: TestStep) => void;
   onAnomaly: (anomaly: Anomaly) => void;
+  /** Paralel/headless koşumda worker'a özel bridge adresi (örn. http://localhost:38402). */
+  bridgeBase?: string;
 }
 
 export interface ExecutionResult {
@@ -351,14 +353,14 @@ export interface ExecutionResult {
 
 // ─── Bridge connection check ──────────────────────────────────────────────────
 
-async function waitForBridge(timeoutMs = 10_000): Promise<void> {
+async function waitForBridge(timeoutMs = 10_000, base = BRIDGE_BASE): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   let attempt = 0;
-  console.log(`[executor] 🔌 Bridge bağlantısı bekleniyor (maks ${timeoutMs / 1000}s)...`);
+  console.log(`[executor] 🔌 Bridge bağlantısı bekleniyor (${base}, maks ${timeoutMs / 1000}s)...`);
   while (Date.now() < deadline) {
     attempt++;
     try {
-      const res = await fetch(`${BRIDGE_BASE}/status`, {
+      const res = await fetch(`${base}/status`, {
         signal: AbortSignal.timeout(1500),
       });
       if (res.ok) {
@@ -387,12 +389,12 @@ async function waitForBridge(timeoutMs = 10_000): Promise<void> {
 
 // ─── Hub idle wait ────────────────────────────────────────────────────────────
 
-async function waitForHubFree(timeoutMs = 45_000): Promise<void> {
+async function waitForHubFree(timeoutMs = 45_000, base = BRIDGE_BASE): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   const start = Date.now();
   while (Date.now() < deadline) {
     try {
-      const res = await fetch(`${BRIDGE_BASE}/status`, { signal: AbortSignal.timeout(2000) });
+      const res = await fetch(`${base}/status`, { signal: AbortSignal.timeout(2000) });
       if (res.ok) {
         const data = (await res.json()) as { connected?: boolean; busy?: boolean };
         if (!data.busy) {
@@ -557,6 +559,7 @@ function determineSuccess(
 export async function executeTestCase(
   ctx: ExecutionContext
 ): Promise<ExecutionResult> {
+  const bridgeBase = ctx.bridgeBase ?? BRIDGE_BASE;
   const startTime = Date.now();
   const steps: TestStep[] = [];
   const anomalies: Anomaly[] = [];
@@ -618,14 +621,14 @@ export async function executeTestCase(
       status: "running",
       timestamp: new Date().toISOString(),
     });
-    await waitForBridge(10_000);
+    await waitForBridge(10_000, bridgeBase);
     steps[steps.length - 1].status = "success";
     steps[steps.length - 1].description = "Page Agent bağlandı ✓";
     ctx.onStep(steps[steps.length - 1]);
 
     // Clean up any lingering previous task before proceeding
     try {
-      await fetch(`${BRIDGE_BASE}/stop`, {
+      await fetch(`${bridgeBase}/stop`, {
         method: "POST",
         signal: AbortSignal.timeout(2000),
       });
@@ -663,11 +666,11 @@ export async function executeTestCase(
 
     // 5. Start SSE listener in parallel
     // Wait for hub to be idle first — prevents "Hub is busy" race between sequential cases
-    await waitForHubFree(45_000);
+    await waitForHubFree(45_000, bridgeBase);
     sseAbort = new AbortController();
     const sseStartIndex = steps.length;
     ssePromise = streamBridgeSteps(
-      BRIDGE_BASE,
+      bridgeBase,
       sseStartIndex,
       sseAbort.signal,
       onSseStep,
@@ -684,7 +687,7 @@ export async function executeTestCase(
     });
 
     try {
-      await fetch(`${BRIDGE_BASE}/navigate`, {
+      await fetch(`${bridgeBase}/navigate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: rootUrl }),
@@ -720,11 +723,11 @@ export async function executeTestCase(
     const isOllamaNative = !isBedrockProvider && llmConfig.apiPath === "/api/chat";
     const isOllamaOpenAICompat = !isBedrockProvider && !!llmConfig.apiPath && !isOllamaNative;
     const effectiveBaseURL = isBedrockProvider
-      ? `${BRIDGE_BASE}/bedrock-proxy/v1`
+      ? `${bridgeBase}/bedrock-proxy/v1`
       : isOllamaNative
-      ? `${BRIDGE_BASE}/ollama-chat-compat`
+      ? `${bridgeBase}/ollama-chat-compat`
       : isOllamaOpenAICompat
-      ? `${BRIDGE_BASE}/ollama-proxy${llmConfig.apiPath}`
+      ? `${bridgeBase}/ollama-proxy${llmConfig.apiPath}`
       : llmConfig.baseURL;
 
     const bridgePayload = {
@@ -779,7 +782,7 @@ export async function executeTestCase(
     for (let attempt = 1; attempt <= BRIDGE_FETCH_RETRIES; attempt++) {
       try {
         execRes = await Promise.race([
-          bridgePost(`${BRIDGE_BASE}/execute`, bridgePayload, execAbort.signal),
+          bridgePost(`${bridgeBase}/execute`, bridgePayload, execAbort.signal),
           hardTimeoutPromise,
         ]);
         lastFetchError = null;
@@ -796,12 +799,12 @@ export async function executeTestCase(
         console.error(
           `[executor] ❌ Bridge /execute fetch hatası (deneme ${attempt}/${BRIDGE_FETCH_RETRIES})` +
           ` | ${lastFetchError.message}${abortSource}` +
-          ` | url=${BRIDGE_BASE}/execute run=${ctx.runId}`
+          ` | url=${bridgeBase}/execute run=${ctx.runId}`
         );
         if (isTimeout) {
           try { sseAbort.abort(); } catch { /* ignore */ }
           try {
-            await fetch(`${BRIDGE_BASE}/stop`, {
+            await fetch(`${bridgeBase}/stop`, {
               method: "POST",
               signal: AbortSignal.timeout(2000),
             });
@@ -847,12 +850,12 @@ export async function executeTestCase(
     // Wait for it to become idle and re-submit once before treating it as a real failure.
     if (isBodyError && (bodyErrMsg ?? "").includes("Hub is busy") && !ctx.signal?.aborted) {
       console.warn(`[executor] ⏳ Hub meşgul hatası alındı — hub boşalınca tekrar denenecek...`);
-      await waitForHubFree(45_000);
+      await waitForHubFree(45_000, bridgeBase);
 
       // Restart SSE for the retry attempt
       sseAbort = new AbortController();
       ssePromise = streamBridgeSteps(
-        BRIDGE_BASE,
+        bridgeBase,
         sseSteps.length + steps.length,
         sseAbort.signal,
         onSseStep,
@@ -862,7 +865,7 @@ export async function executeTestCase(
       let retryFetchErr: Error | null = null;
       let retryRes!: BridgeResponse;
       try {
-        retryRes = await bridgePost(`${BRIDGE_BASE}/execute`, bridgePayload, execAbort.signal);
+        retryRes = await bridgePost(`${bridgeBase}/execute`, bridgePayload, execAbort.signal);
       } catch (e) {
         retryFetchErr = e instanceof Error ? e : new Error(String(e));
       } finally {
@@ -890,13 +893,13 @@ export async function executeTestCase(
         `[executor]   Hata: ${(bodyErrMsg ?? "").split("\n")[0]}\n` +
         `[executor]   run=${ctx.runId} case=${ctx.caseResultId} SSEadım=${sseSteps.length}`
       );
-      await waitForHubFree(60_000);
+      await waitForHubFree(60_000, bridgeBase);
 
       console.log(`[executor] 🔄 Hub yeniden bağlandı — görev sıfırdan tekrar gönderiliyor...`);
 
       sseAbort = new AbortController();
       ssePromise = streamBridgeSteps(
-        BRIDGE_BASE,
+        bridgeBase,
         sseSteps.length + steps.length,
         sseAbort.signal,
         onSseStep,
@@ -906,7 +909,7 @@ export async function executeTestCase(
       let retryFetchErr2: Error | null = null;
       let retryRes2!: BridgeResponse;
       try {
-        retryRes2 = await bridgePost(`${BRIDGE_BASE}/execute`, bridgePayload, execAbort.signal);
+        retryRes2 = await bridgePost(`${bridgeBase}/execute`, bridgePayload, execAbort.signal);
       } catch (e) {
         retryFetchErr2 = e instanceof Error ? e : new Error(String(e));
       } finally {
@@ -971,7 +974,7 @@ export async function executeTestCase(
     // 8. If test failed, request a screenshot from the extension
     if (!success) {
       try {
-        await fetch(`${BRIDGE_BASE}/command`, {
+        await fetch(`${bridgeBase}/command`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

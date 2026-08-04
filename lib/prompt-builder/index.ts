@@ -5,6 +5,7 @@
 import type { SystemPromptData } from "../config/system-prompt";
 import type { ExecutionContext } from "../mcp-bridge/executor";
 import { buildGetmobilWebsiteContext } from "./getmobil-website";
+import { buildGetmobilBackofficeContext } from "./getmobil-backoffice";
 
 export interface TaskBuildInput {
   ctx: ExecutionContext;
@@ -19,7 +20,11 @@ export function buildPageAgentTask(input: TaskBuildInput): string {
   const { testCase } = ctx;
 
   const platformContext =
-    ctx.platform === "website" ? buildGetmobilWebsiteContext() + "\n\n" : "";
+    ctx.platform === "website"
+      ? buildGetmobilWebsiteContext() + "\n\n"
+      : ctx.platform === "backoffice"
+      ? buildGetmobilBackofficeContext() + "\n\n"
+      : "";
 
   const domainSection = domainContext
     ? `<domain_context>\n${domainContext}\n</domain_context>\n\n`
@@ -45,7 +50,7 @@ NAVIGATION STRATEGY (important):
 
   const coreTask = `${platformContext}${domainSection}You are a QA automation agent. The browser is already open on ${rootUrl}.
 
-Actions you can use: done, wait, click_element_by_index, input_text, select_dropdown_option, scroll, scroll_horizontally, open_new_tab, switch_to_tab, close_tab.
+Actions you can use: done, wait, go_to_url, click_element_by_index, input_text, select_dropdown_option, scroll, scroll_horizontally, open_new_tab, switch_to_tab, close_tab.
 
 TASK
 ${resolvedPrompt}

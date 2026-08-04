@@ -39,7 +39,11 @@ if (fs.existsSync(envPath)) {
     if (eq === -1) continue;
     const key = trimmed.slice(0, eq).trim();
     const val = trimmed.slice(eq + 1).trim();
-    process.env[key] = val;
+    // Zaten set edilmiş env değişkenlerini EZME (standart dotenv davranışı) —
+    // headless havuz worker'ları PAGE_AGENT_PORT'u spawn env'iyle geçirir.
+    if (process.env[key] === undefined) {
+      process.env[key] = val;
+    }
   }
   console.log("[bridge] .env.local yüklendi");
 }

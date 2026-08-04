@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { saveScreenshot, getScreenshots } from "@/lib/db/queries";
+import { saveScreenshot, getScreenshots, getScreenshotsByRun } from "@/lib/db/queries";
 
 const SCREENSHOTS_DIR = path.join(process.cwd(), "data", "screenshots");
 const MAX_SIZE_MB = parseInt(process.env.SCREENSHOT_MAX_SIZE_MB ?? "5", 10);
@@ -65,10 +65,15 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const testCaseId = searchParams.get("testCaseId");
+  const runId = searchParams.get("runId");
+
+  if (runId) {
+    return NextResponse.json({ screenshots: getScreenshotsByRun(runId) });
+  }
 
   if (!testCaseId) {
     return NextResponse.json(
-      { error: "testCaseId query param zorunlu" },
+      { error: "testCaseId veya runId query param zorunlu" },
       { status: 400 }
     );
   }
