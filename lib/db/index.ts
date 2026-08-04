@@ -122,5 +122,40 @@ function initSchema(db: Database.Database): void {
     );
 
     CREATE INDEX IF NOT EXISTS idx_jira_qa_effort_key ON jira_qa_effort(jira_key);
+
+    CREATE TABLE IF NOT EXISTS snapshot_targets (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      platform TEXT NOT NULL,
+      environment TEXT NOT NULL,
+      path TEXT NOT NULL DEFAULT '/',
+      threshold REAL NOT NULL DEFAULT 0.5,
+      baseline_path TEXT,
+      baseline_updated_at TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS snapshot_results (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      target_id TEXT NOT NULL REFERENCES snapshot_targets(id) ON DELETE CASCADE,
+      status TEXT NOT NULL,
+      current_path TEXT,
+      baseline_path TEXT,
+      diff_path TEXT,
+      diff_pixels INTEGER,
+      diff_percentage REAL,
+      error_message TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_snapshot_results_target ON snapshot_results(target_id, id DESC);
   `);
+
+  // CREATE TABLE IF NOT EXISTS mevcut tabloya kolon eklemez — sonradan
+  // eklenen kolonlar için güvenli migration
+  try {
+    db.exec("ALTER TABLE snapshot_results ADD COLUMN masked_percentage REAL");
+  } catch {
+    /* kolon zaten var */
+  }
 }

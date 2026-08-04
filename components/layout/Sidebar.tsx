@@ -9,14 +9,27 @@ import {
   Terminal,
   GitBranch,
   BookOpen,
+  Camera,
 } from "lucide-react";
 
-const navItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  children?: NavItem[];
+}
+
+const navItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/jira", label: "JIRA Pipeline", icon: GitBranch },
   { href: "/test-suite", label: "Test Suite", icon: FlaskConical },
   { href: "/prompt", label: "Prompt Editör", icon: Terminal },
-  { href: "/reports", label: "Raporlar", icon: FileText },
+  {
+    href: "/reports",
+    label: "Raporlar",
+    icon: FileText,
+    children: [{ href: "/reports/snapshots", label: "Snapshot Testleri", icon: Camera }],
+  },
   { href: "/domain", label: "Domain", icon: BookOpen },
 ];
 
@@ -56,31 +69,58 @@ export function Sidebar() {
       <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
+          const childActive = item.children?.some((c) =>
+            pathname.startsWith(c.href)
+          );
           const isActive =
             item.href === "/"
               ? pathname === "/"
-              : pathname.startsWith(item.href);
+              : pathname.startsWith(item.href) && !childActive;
 
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
-                isActive
-                  ? "font-medium border-l-2"
-                  : "hover:bg-accent"
-              }`}
-              style={isActive ? {
-                background: "var(--bg-active, hsl(var(--accent)))",
-                color: "var(--accent-color, hsl(var(--primary)))",
-                borderLeftColor: "var(--accent-color, hsl(var(--primary)))",
-              } : {
-                color: "var(--txt-dim, hsl(var(--muted-foreground)))",
-              }}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {item.label}
-            </Link>
+            <div key={item.href}>
+              <Link
+                href={item.href}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm transition-colors ${
+                  isActive
+                    ? "font-medium border-l-2"
+                    : "hover:bg-accent"
+                }`}
+                style={isActive ? {
+                  background: "var(--bg-active, hsl(var(--accent)))",
+                  color: "var(--accent-color, hsl(var(--primary)))",
+                  borderLeftColor: "var(--accent-color, hsl(var(--primary)))",
+                } : {
+                  color: "var(--txt-dim, hsl(var(--muted-foreground)))",
+                }}
+              >
+                <Icon className="w-4 h-4 shrink-0" />
+                {item.label}
+              </Link>
+              {item.children?.map((child) => {
+                const ChildIcon = child.icon;
+                const isChildActive = pathname.startsWith(child.href);
+                return (
+                  <Link
+                    key={child.href}
+                    href={child.href}
+                    className={`flex items-center gap-2.5 pl-8 pr-3 py-1.5 mt-0.5 rounded-md text-[13px] transition-colors ${
+                      isChildActive ? "font-medium border-l-2" : "hover:bg-accent"
+                    }`}
+                    style={isChildActive ? {
+                      background: "var(--bg-active, hsl(var(--accent)))",
+                      color: "var(--accent-color, hsl(var(--primary)))",
+                      borderLeftColor: "var(--accent-color, hsl(var(--primary)))",
+                    } : {
+                      color: "var(--txt-dim, hsl(var(--muted-foreground)))",
+                    }}
+                  >
+                    <ChildIcon className="w-3.5 h-3.5 shrink-0" />
+                    {child.label}
+                  </Link>
+                );
+              })}
+            </div>
           );
         })}
       </nav>

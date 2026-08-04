@@ -573,3 +573,169 @@ export function getTestCaseHealth(): TestCaseHealthRow[] {
     LIMIT 20
   `).all() as TestCaseHealthRow[];
 }
+
+// ─── Snapshot testing ─────────────────────────────────────────────────────────
+
+export type SnapshotStatus = "new" | "match" | "mismatch" | "updated" | "error";
+
+export interface SnapshotTargetRow {
+  id: string;
+  name: string;
+  platform: string;
+  environment: string;
+  path: string;
+  threshold: number;
+  baseline_path: string | null;
+  baseline_updated_at: string | null;
+  created_at: string;
+}
+
+export interface SnapshotResultRow {
+  id: number;
+  target_id: string;
+  status: SnapshotStatus;
+  current_path: string | null;
+  baseline_path: string | null;
+  diff_path: string | null;
+  diff_pixels: number | null;
+  diff_percentage: number | null;
+  masked_percentage: number | null;
+  error_message: string | null;
+  created_at: string;
+}
+
+export function createSnapshotTarget(target: {
+  id: string;
+  name: string;
+  platform: string;
+  environment: string;
+  path: string;
+  threshold: number;
+}): SnapshotTargetRow {
+  const db = getDb();
+  db.prepare(`
+    INSERT INTO snapshot_targets (id, name, platform, environment, path, threshold)
+    VALUES (@id, @name, @platform, @environment, @path, @threshold)
+  `).run(target);
+  return getSnapshotTarget(target.id)!;
+}
+
+export function getSnapshotTarget(id: string): SnapshotTargetRow | null {
+  const db = getDb();
+  const row = db.prepare("SELECT * FROM snapshot_targets WHERE id = ?").get(id) as
+    | SnapshotTargetRow
+    | undefined;
+  return row ?? null;
+}
+
+export function listSnapshotTargets(): (SnapshotTargetRow & {
+  last_result: SnapshotResultRow | null;
+})[] {
+  const db = getDb();
+  const targets = db
+    .prepare("SELECT * FROM snapshot_targets ORDER BY created_at DESC")
+    .all() as SnapshotTargetRow[];
+  const lastStmt = db.prepare(
+    "SELECT * FROM snapshot_results WHERE target_id = ? ORDER BY id DESC LIMIT 1"
+  );
+  return targets.map((t) => ({
+    ...t,
+    last_result: (lastStmt.get(t.id) as SnapshotResultRow | undefined) ?? null,
+  }));
+}
+
+export function updateSnapshotTarget(
+  id: string,
+  fields: Partial<Pick<SnapshotTargetRow, "name" | "path" | "threshold">>
+): void {
+  const db = getDb();
+  const sets: string[] = [];
+  const params: Record<string, unknown> = { id };
+  if (fields.name !== undefined) { sets.push("name = @name"); params.name = fields.name; }
+  if (fields.path !== undefined) { sets.push("path = @path"); params.path = fields.path; }
+  if (fields.threshold !== undefined) { sets.push("threshold = @threshold"); params.threshold = fields.threshold; }
+  if (sets.length === 0) return;
+  db.prepare(`UPDATE snapshot_targets SET ${sets.join(", ")} WHERE id = @id`).run(params);
+}
+
+export function setSnapshotBaseline(targetId: string, baselinePath: string): void {
+  const db = getDb();
+  db.prepare(`
+    UPDATE snapshot_targets
+    SET baseline_path = ?, baseline_updated_at = datetime('now')
+    WHERE id = ?
+  `).run(baselinePath, targetId);
+}
+
+export function deleteSnapshotTarget(id: string): boolean {
+  const db = getDb();
+  const info = db.prepare("DELETE FROM snapshot_targets WHERE id = ?").run(id);
+  return info.changes > 0;
+}
+
+export function insertSnapshotResult(result: {
+  targetId: string;
+  status: SnapshotStatus;
+  currentPath?: string | null;
+  baselinePath?: string | null;
+  diffPath?: string | null;
+  diffPixels?: number | null;
+  diffPercentage?: number | null;
+  maskedPercentage?: number | null;
+  errorMessage?: string | null;
+}): SnapshotResultRow {
+  const db = getDb();
+  const info = db.prepare(`
+    INSERT INTO snapshot_results (target_id, status, current_path, baseline_path, diff_path, diff_pixels, diff_percentage, masked_percentage, error_message)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    result.targetId,
+    result.status,
+    result.currentPath ?? null,
+    result.baselinePath ?? null,
+    result.diffPath ?? null,
+    result.diffPixels ?? null,
+    result.diffPercentage ?? null,
+    result.maskedPercentage ?? null,
+    result.errorMessage ?? null
+  );
+  return db
+    .prepare("SELECT * FROM snapshot_results WHERE id = ?")
+    .get(info.lastInsertRowid) as SnapshotResultRow;
+}
+
+export function getSnapshotResult(id: number): SnapshotResultRow | null {
+  const db = getDb();
+  const row = db.prepare("SELECT * FROM snapshot_results WHERE id = ?").get(id) as
+    | SnapshotResultRow
+    | undefined;
+  return row ?? null;
+}
+
+export function updateSnapshotResultStatus(id: number, status: SnapshotStatus): void {
+  const db = getDb();
+  db.prepare("UPDATE snapshot_results SET status = ? WHERE id = ?").run(status, id);
+}
+
+export function listSnapshotResults(targetId: string, limit = 20): SnapshotResultRow[] {
+  const db = getDb();
+  return db
+    .prepare("SELECT * FROM snapshot_results WHERE target_id = ? ORDER BY id DESC LIMIT ?")
+    .all(targetId, limit) as SnapshotResultRow[];
+}
+
+export function getLatestScreenshotAfter(testCaseId: string, afterId: number): ScreenshotRow | null {
+  const db = getDb();
+  const row = db
+    .prepare("SELECT * FROM screenshots WHERE test_case_id = ? AND id > ? ORDER BY id DESC LIMIT 1")
+    .get(testCaseId, afterId) as ScreenshotRow | undefined;
+  return row ?? null;
+}
+
+export function getMaxScreenshotId(testCaseId: string): number {
+  const db = getDb();
+  const row = db
+    .prepare("SELECT COALESCE(MAX(id), 0) as maxId FROM screenshots WHERE test_case_id = ?")
+    .get(testCaseId) as { maxId: number };
+  return row.maxId;
+}
