@@ -12,9 +12,11 @@ out/
 # Sensitive test data — commit only the .example template
 data/system-prompt.json
 
-# SQLite database
+# SQLite database (including WAL/SHM companion files)
 *.db
 *.sqlite
+*.db-shm
+*.db-wal
 
 # Screenshots (generated at runtime — large binary files)
 data/screenshots/
@@ -26,6 +28,15 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Runtime run/bridge logs (JSONL + process output, regenerated on every run)
+data/logs/
+
+# TypeScript incremental build cache
+tsconfig.tsbuildinfo
+
+# Claude Code local settings
+.claude/settings.local.json
 
 # Editor
 .vscode/

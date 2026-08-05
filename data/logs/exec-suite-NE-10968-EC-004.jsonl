@@ -1,2 +1,0 @@
-{"type":"execute","ts":"2026-05-25T13:39:25.565Z","runId":"exec-suite-NE-10968-EC-004","caseId":"NE-10968-EC-004","model":"gpt-5.1","message":"Görev başlatıldı: Sen bir QA otomasyon ajanısın. Sana bir test talimatı verilecek; browser üzerinde adımları uygula.\n\n## Sayfadaki Mevcut ..."}
-{"type":"error","ts":"2026-05-25T13:39:25.566Z","runId":"exec-suite-NE-10968-EC-004","caseId":"NE-10968-EC-004","error":"Hub is busy with another task"}

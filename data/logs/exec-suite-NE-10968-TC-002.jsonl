@@ -1,4 +1,0 @@
-{"type":"execute","ts":"2026-05-25T13:39:25.551Z","runId":"exec-suite-NE-10968-TC-002","caseId":"NE-10968-TC-002","model":"gpt-5.1","message":"Görev başlatıldı: Sen bir QA otomasyon ajanısın. Sana bir test talimatı verilecek; browser üzerinde adımları uygula.\n\n## Sayfadaki Mevcut ..."}
-{"type":"error","ts":"2026-05-25T13:39:25.552Z","runId":"exec-suite-NE-10968-TC-002","caseId":"NE-10968-TC-002","error":"Hub is busy with another task"}
-{"type":"execute","ts":"2026-05-25T13:39:25.552Z","runId":"exec-suite-NE-10968-TC-002","caseId":"NE-10968-TC-002","model":"gpt-5.1","message":"Görev başlatıldı: Sen bir QA otomasyon ajanısın. Sana bir test talimatı verilecek; browser üzerinde adımları uygula.\n\n## Sayfadaki Mevcut ..."}
-{"type":"error","ts":"2026-05-25T13:39:25.552Z","runId":"exec-suite-NE-10968-TC-002","caseId":"NE-10968-TC-002","error":"Hub is busy with another task"}
